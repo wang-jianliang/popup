@@ -15,7 +15,7 @@ console.log('background loaded');
 browser.contextMenus.create({
   id: 'ask_gpt',
   title: 'Ask GPT',
-  contexts: ['selection'],
+  contexts: ['selection', 'page', 'image'],
 });
 
 browser.contextMenus?.onClicked.addListener(async function (info: any) {

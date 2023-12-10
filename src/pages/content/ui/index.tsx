@@ -3,9 +3,11 @@ import App from '@pages/content/ui/app';
 import refreshOnUpdate from 'virtual:reload-on-update-in-view';
 import injectedStyle from './injected.css?inline';
 import browser from 'webextension-polyfill';
-import { Message, UserEventType } from '@root/src/types';
+import { BrowserMessage, UserEventType } from '@root/src/types';
 import { getClientX, getClientY } from '@root/src/utils';
 import { contentContainerViewId, messageType_AskGPT } from '@root/src/constants';
+import EmotionCacheProvider from './EmotionCacheProvider';
+import CustomChakraProvider from './CustomChakraProvider';
 
 refreshOnUpdate('pages/content');
 
@@ -28,7 +30,13 @@ async function createContainerView(x: number, y: number) {
   styleElement.innerHTML = injectedStyle;
   shadowRoot.appendChild(styleElement);
   reactRoot = createRoot(rootIntoShadow);
-  reactRoot.render(<App position={{ x, y }} />);
+  reactRoot.render(
+    <EmotionCacheProvider rootId={root.id}>
+      <CustomChakraProvider shadowRootId={rootIntoShadow.id}>
+        <App position={{ x, y }} onClose={hideContainerView} />
+      </CustomChakraProvider>
+    </EmotionCacheProvider>,
+  );
 }
 
 async function hideContainerView() {
@@ -52,17 +60,17 @@ const mouseUpHandler = async (event: UserEventType) => {
   lastMouseEvent = event;
 };
 
-const mouseDownHandler = async (event: UserEventType) => {
-  console.log('[content.js]. mouse down event:', event);
-  await hideContainerView();
-};
+// const mouseDownHandler = async (event: UserEventType) => {
+//   console.log('[content.js]. mouse down event:', event);
+//   await hideContainerView();
+// };
 
 document.addEventListener('mouseup', mouseUpHandler);
 document.addEventListener('touchend', mouseUpHandler);
-document.addEventListener('mousedown', mouseDownHandler);
+// document.addEventListener('mousedown', mouseDownHandler);
 
 // Function called when a new message is received
-const messagesFromContextMenu = async (msg: Message) => {
+const messagesFromContextMenu = async (msg: BrowserMessage) => {
   console.log('[content.js]. Message received', msg);
 
   if (msg.type === messageType_AskGPT) {

@@ -1,6 +1,6 @@
 export type UserEventType = MouseEvent | TouchEvent | PointerEvent;
 
-export interface Message {
+export interface BrowserMessage {
   type: string;
   body: any;
 }
