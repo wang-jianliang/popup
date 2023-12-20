@@ -1,5 +1,9 @@
 export const contentContainerViewId = 'popup-content-view-container';
 
-export const messageType_AskGPT = 'ask_gpt';
-export const messageType_AskText = 'ask_text';
-export const messageType_AskImage = 'ask_image';
+export const messageType_MenuClicked = 'menu_clicked';
+
+export const storageSyncKey_APIKey = 'api_key';
+export const storageSyncKey_Model = 'model';
+export const storageSyncKey_Agents = 'agents';
+
+export const defaultModel = 'gpt-3.5-turbo';

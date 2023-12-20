@@ -8,8 +8,9 @@ import {
   GlobalStyle,
   ThemeProvider,
 } from '@chakra-ui/react';
+import globalStyles from '@src/styles';
 
-const theme = extendTheme();
+const theme = extendTheme(globalStyles);
 
 const getCurrentTheme = () => {
   const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

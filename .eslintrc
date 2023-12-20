@@ -28,6 +28,7 @@
     }
   },
   "rules": {
+    "import/named": 0,
     "react/react-in-jsx-scope": "off",
     "import/no-unresolved": "off",
     "@typescript-eslint/no-explicit-any": "off"

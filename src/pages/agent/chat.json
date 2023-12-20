@@ -1,0 +1,9 @@
+{
+  "name": "Chat with the bot",
+  "model": "gpt-3.5-turbo",
+  "prompts": {
+    "selection": "${selection}\n",
+    "image": ""
+  },
+  "autoSend": false
+}

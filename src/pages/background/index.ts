@@ -1,6 +1,8 @@
-import { messageType_AskGPT } from '@root/src/constants';
+import { messageType_MenuClicked } from '@root/src/constants';
 import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
-import browser from 'webextension-polyfill';
+import AgentsLoader from '@pages/agent/agentsRegister';
+import { browser, Menus } from 'webextension-polyfill-ts';
+import OnClickData = Menus.OnClickData;
 
 reloadOnUpdate('pages/background');
 
@@ -12,18 +14,28 @@ reloadOnUpdate('pages/content/style.scss');
 
 console.log('background loaded');
 
-browser.contextMenus.create({
-  id: 'ask_gpt',
-  title: 'Ask GPT',
-  contexts: ['selection', 'page', 'image'],
+const agentsRegistry = new AgentsLoader();
+agentsRegistry.loadAgents().then(agents => {
+  console.log('agents loaded', agents);
+  agents.forEach((agent, id) => {
+    console.log('agent:', agent.prompts);
+    browser.contextMenus.create({
+      id: id,
+      title: agent.name,
+      contexts: Object.keys(agent.prompts) as unknown as Menus.ContextType[],
+    });
+  });
 });
 
-browser.contextMenus?.onClicked.addListener(async function (info: any) {
+browser.contextMenus?.onClicked.addListener(async function (info: OnClickData) {
+  const agent = agentsRegistry.getAgent(<string>info.menuItemId);
+
   console.log('[background.js', 'contextMenus onClicked');
   const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
   tab.id &&
-    browser.tabs.sendMessage(tab.id, {
-      type: messageType_AskGPT,
-      info,
-    });
+    (await browser.tabs.sendMessage(tab.id, {
+      type: messageType_MenuClicked,
+      agent: agent,
+      info: info,
+    }));
 });
