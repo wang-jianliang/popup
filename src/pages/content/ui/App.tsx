@@ -101,7 +101,14 @@ export default function App(props: Props) {
         </Box>
       ) : (
         <CardBody padding="2">
-          <ChatBox APIKey={apiKey} model={model} preInput={input} messagesHistory={messages} maxH="600px" />
+          <ChatBox
+            APIKey={apiKey}
+            model={model}
+            preInput={input}
+            messagesHistory={messages}
+            minW="400px"
+            maxH="600px"
+          />
         </CardBody>
       )}
     </Card>

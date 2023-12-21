@@ -10,7 +10,7 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
-import { SetStateAction, useEffect, useRef, useState } from 'react';
+import { KeyboardEvent, SetStateAction, useEffect, useRef, useState } from 'react';
 import { chatCompletions } from '@pages/common/chatgpt';
 import { Send } from '@pages/content/ui/Icons';
 import { ChatMessage } from '@pages/content/ui/types';
@@ -22,15 +22,17 @@ type Props = {
   model: string | null;
   preInput?: string;
   messagesHistory?: ChatMessage[];
-  maxH: string;
+  minW?: string;
+  maxH?: string;
 };
 
 function ChatBox(
-  { APIKey, model, preInput, messagesHistory = [], maxH }: Props = {
+  { APIKey, model, preInput, messagesHistory = [], minW, maxH }: Props = {
     APIKey: null,
     model: null,
     preInput: null,
     messagesHistory: [],
+    minW: 'min-content',
     maxH: '100%',
   },
 ) {
@@ -38,10 +40,19 @@ function ChatBox(
   const [input, setInput] = useState(preInput);
 
   const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const scrollToAnchor = () => {
     messagesEndRef.current?.scrollBy({ top: messagesEndRef.current.scrollHeight });
   };
+
+  // move cursor to the end
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.selectionStart = textareaRef.current.value.length;
+      textareaRef.current.selectionEnd = textareaRef.current.value.length;
+    }
+  }, [preInput]);
 
   useEffect(() => {
     setMessagesState(prevState => ({
@@ -95,6 +106,7 @@ function ChatBox(
     ) {
       sendChat().catch(err => alert(err));
     }
+    textareaRef.current && textareaRef.current.focus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messagesState]);
 
@@ -108,7 +120,16 @@ function ChatBox(
     setInput('');
   };
 
-  const textareaRef = useRef();
+  const handleInputKeyDown = (event: KeyboardEvent) => {
+    console.log('handle key event:', event);
+    switch (event.key) {
+      case 'Enter':
+        if (event.ctrlKey) {
+          onInputSend();
+        }
+    }
+  };
+
   useEffect(() => {
     autosize(textareaRef.current);
     return () => {
@@ -118,26 +139,30 @@ function ChatBox(
 
   const botMessageBg = useColorModeValue('#4ed1a2', 'gray.600');
   const userMessageBg = useColorModeValue('#f6f7f9', 'gray.500');
+  const userColor = useColorModeValue('black', 'white');
+  const botColor = useColorModeValue('white', 'white');
 
   return (
     <Container padding={0.5}>
       <VStack>
         <Container padding={1}>
           <Card padding={3} boxShadow="inset 0 0 1px #A0AEC0">
-            <List ref={messagesEndRef} spacing={3} maxH={maxH} overflow="auto" paddingBottom={2}>
-              {messagesState.messages.map((msg, index) => (
-                <ListItem key={index} maxW="100%" paddingRight={3}>
-                  <Card
-                    width="max-content"
-                    maxW="100%"
-                    backgroundColor={msg.role === 'user' ? botMessageBg : userMessageBg}
-                    color={msg.role === 'user' ? 'white' : 'black'}
-                    p={2}
-                    borderRadius={12}>
-                    <MarkdownSyntaxHighlight markdown={msg.content}></MarkdownSyntaxHighlight>
-                  </Card>
-                </ListItem>
-              ))}
+            <List ref={messagesEndRef} spacing={3} minW={minW} maxH={maxH} overflow="auto" paddingBottom={2}>
+              {messagesState.messages
+                .filter(msg => msg.role != 'system')
+                .map((msg, index) => (
+                  <ListItem key={index} maxW="100%" paddingRight={3}>
+                    <Card
+                      width="max-content"
+                      maxW="100%"
+                      backgroundColor={msg.role === 'user' ? botMessageBg : userMessageBg}
+                      color={msg.role === 'user' ? userColor : botColor}
+                      p={2}
+                      borderRadius={12}>
+                      <MarkdownSyntaxHighlight markdown={msg.content}></MarkdownSyntaxHighlight>
+                    </Card>
+                  </ListItem>
+                ))}
             </List>
           </Card>
         </Container>
@@ -147,6 +172,7 @@ function ChatBox(
               ref={textareaRef}
               value={input}
               onChange={handleInputChange}
+              onKeyDown={handleInputKeyDown}
               minH="max-content"
               padding={2}
               borderColor="gray.200"
