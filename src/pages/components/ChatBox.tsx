@@ -1,9 +1,8 @@
 import {
   Card,
   Container,
+  Flex,
   IconButton,
-  InputGroup,
-  InputRightElement,
   List,
   ListItem,
   Textarea,
@@ -12,7 +11,7 @@ import {
 } from '@chakra-ui/react';
 import { KeyboardEvent, SetStateAction, useEffect, useRef, useState } from 'react';
 import { chatCompletions } from '@pages/common/chatgpt';
-import { Send } from '@pages/content/ui/Icons';
+import { Clear, Send } from '@pages/content/ui/Icons';
 import { ChatMessage } from '@pages/content/ui/types';
 import autosize from 'autosize';
 import MarkdownSyntaxHighlight from '@pages/components/Markdown';
@@ -22,12 +21,13 @@ type Props = {
   model: string | null;
   preInput?: string;
   messagesHistory?: ChatMessage[];
+  onClearMessages?: (messages: ChatMessage[]) => void;
   minW?: string;
   maxH?: string;
 };
 
 function ChatBox(
-  { APIKey, model, preInput, messagesHistory = [], minW, maxH }: Props = {
+  { APIKey, model, preInput, messagesHistory, onClearMessages, minW, maxH }: Props = {
     APIKey: null,
     model: null,
     preInput: null,
@@ -60,6 +60,11 @@ function ChatBox(
       messages: messagesHistory,
     }));
   }, [messagesHistory]);
+
+  const clearMessages = async () => {
+    onClearMessages && onClearMessages(messagesState.messages);
+    setMessagesState({ messages: [], incoming: false });
+  };
 
   const sendChat = async () => {
     await chatCompletions(
@@ -167,7 +172,7 @@ function ChatBox(
           </Card>
         </Container>
         <Container padding={1}>
-          <InputGroup>
+          <Flex position="relative">
             <Textarea
               ref={textareaRef}
               value={input}
@@ -178,10 +183,34 @@ function ChatBox(
               borderColor="gray.200"
               width="100%"
             />
-            <InputRightElement>
-              <IconButton onClick={onInputSend} size="sm" aria-label="Send message" icon={<Send />} />
-            </InputRightElement>
-          </InputGroup>
+            <Flex position="absolute" bottom="8px" right="8px">
+              <IconButton
+                onClick={clearMessages}
+                size="sm"
+                mr={2}
+                aria-label="Clear messages"
+                icon={<Clear />}
+                zIndex={1}
+              />
+              <IconButton onClick={onInputSend} size="sm" aria-label="Send messages" icon={<Send />} zIndex={1} />
+            </Flex>
+          </Flex>
+          {/*<InputGroup>*/}
+          {/*  <Textarea*/}
+          {/*    ref={textareaRef}*/}
+          {/*    value={input}*/}
+          {/*    onChange={handleInputChange}*/}
+          {/*    onKeyDown={handleInputKeyDown}*/}
+          {/*    minH="max-content"*/}
+          {/*    padding={2}*/}
+          {/*    borderColor="gray.200"*/}
+          {/*    width="100%"*/}
+          {/*  />*/}
+          {/*  <InputRightElement>*/}
+          {/*    <IconButton onClick={clearMessages} size="sm" mr={2} aria-label="Clear messages" icon={<Clear />} />*/}
+          {/*    <IconButton onClick={onInputSend} size="sm" mr={4} aria-label="Send messages" icon={<Send />} />*/}
+          {/*  </InputRightElement>*/}
+          {/*</InputGroup>*/}
         </Container>
       </VStack>
     </Container>
