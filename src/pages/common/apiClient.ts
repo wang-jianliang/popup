@@ -1,4 +1,3 @@
-// import axios from 'axios';
 interface ApiConfig {
   baseURL: string;
   timeout?: number;

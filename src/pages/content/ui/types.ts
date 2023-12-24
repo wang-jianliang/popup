@@ -1,9 +1,4 @@
 export interface ChatMessage {
-  role: string;
+  role: string | null;
   content: string;
 }
-
-// interface ChatSession {
-//   title: string;
-//   messages: [];
-// }

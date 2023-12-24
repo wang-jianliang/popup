@@ -17,6 +17,7 @@ import { browser, Menus } from 'webextension-polyfill-ts';
 import Agent from '@pages/agent/agent';
 import OnClickData = Menus.OnClickData;
 import { SettingsIcon } from '@chakra-ui/icons';
+import { createNewSession } from '@pages/storage/chat';
 
 interface Props {
   agent?: Agent;
@@ -31,6 +32,8 @@ export default function App(props: Props) {
   const [apiKey, setAPIKey] = useState(null);
   const [model, setModel] = useState(defaultModel);
   const [showSettings, setShowSettings] = useState(false);
+
+  const [sessionId, setSessionId] = useState(-1);
 
   useEffect(() => {
     let prompt: string;
@@ -47,15 +50,14 @@ export default function App(props: Props) {
       if (agent.autoSend) {
         setMessages(() => {
           const userMessage = { role: 'user', content: prompt };
-          if (agent.systemPrompt) {
-            return [{ role: 'system', content: agent.systemPrompt }, userMessage];
-          }
           return [userMessage];
         });
       } else {
         console.log('set input', prompt);
         setInput(prompt);
       }
+
+      createNewSession(prompt).then(id => setSessionId(id));
     } else {
       alert('Prompt is empty');
     }
@@ -101,14 +103,18 @@ export default function App(props: Props) {
         </Box>
       ) : (
         <CardBody padding="2">
-          <ChatBox
-            APIKey={apiKey}
-            model={model}
-            preInput={input}
-            messagesHistory={messages}
-            minW="400px"
-            maxH="600px"
-          />
+          {sessionId > 0 && (
+            <ChatBox
+              APIKey={apiKey}
+              model={model}
+              preInput={input}
+              systemPrompt={agent.systemPrompt}
+              sessionId={sessionId}
+              newMessages={messages}
+              minW="400px"
+              maxH="600px"
+            />
+          )}
         </CardBody>
       )}
     </Card>

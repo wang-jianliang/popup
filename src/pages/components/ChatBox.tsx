@@ -9,34 +9,39 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
-import { KeyboardEvent, SetStateAction, useEffect, useRef, useState } from 'react';
+import { KeyboardEvent, MutableRefObject, SetStateAction, useEffect, useRef, useState } from 'react';
 import { chatCompletions } from '@pages/common/chatgpt';
 import { Clear, Send } from '@pages/content/ui/Icons';
 import { ChatMessage } from '@pages/content/ui/types';
 import autosize from 'autosize';
 import MarkdownSyntaxHighlight from '@pages/components/Markdown';
+import { getMessages, storeNewMessages } from '@pages/storage/chat';
 
 type Props = {
   APIKey: string | null;
   model: string | null;
   preInput?: string;
-  messagesHistory?: ChatMessage[];
+  sessionId: number;
+  systemPrompt?: string;
+  newMessages?: ChatMessage[];
   onClearMessages?: (messages: ChatMessage[]) => void;
   minW?: string;
   maxH?: string;
 };
 
 function ChatBox(
-  { APIKey, model, preInput, messagesHistory, onClearMessages, minW, maxH }: Props = {
+  { APIKey, model, preInput, sessionId, systemPrompt, newMessages, onClearMessages, minW, maxH }: Props = {
     APIKey: null,
     model: null,
     preInput: null,
-    messagesHistory: [],
+    sessionId: -1,
+    newMessages: [],
     minW: 'min-content',
     maxH: '100%',
   },
 ) {
   const [messagesState, setMessagesState] = useState({ messages: [], incoming: false });
+  const [incomingMessage, setIncomingMessage] = useState(null);
   const [input, setInput] = useState(preInput);
 
   const messagesEndRef = useRef(null);
@@ -46,6 +51,25 @@ function ChatBox(
     messagesEndRef.current?.scrollBy({ top: messagesEndRef.current.scrollHeight });
   };
 
+  // load messages from storage
+  useEffect(() => {
+    console.log('session id:', sessionId);
+    if (sessionId >= 0) {
+      getMessages(sessionId).then(messages => {
+        // 1. load message history to state
+        setMessagesState(() => {
+          return {
+            messages: messages,
+            incoming: false,
+          };
+        });
+        // 2. add new messages to store and state
+        newMessages.length > 0 && addMessages(newMessages);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // move cursor to the end
   useEffect(() => {
     if (textareaRef.current) {
@@ -54,74 +78,79 @@ function ChatBox(
     }
   }, [preInput]);
 
-  useEffect(() => {
-    setMessagesState(prevState => ({
-      ...prevState,
-      messages: messagesHistory,
-    }));
-  }, [messagesHistory]);
-
   const clearMessages = async () => {
     onClearMessages && onClearMessages(messagesState.messages);
-    setMessagesState({ messages: [], incoming: false });
+
+    // insert an empty message to mark the ending
+    const emptyMessage: ChatMessage = { role: null, content: '' };
+    addMessages([emptyMessage]);
   };
 
-  const sendChat = async () => {
+  const messageStateRef: MutableRefObject<{ messages: ChatMessage[]; incoming: boolean }> = useRef();
+  messageStateRef.current = messagesState;
+  const sendChat = async (messages: ChatMessage[]) => {
+    const newMessages = [...messages];
+    // iterate messages until got an empty one
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
+      if (message.role == null) {
+        break;
+      }
+      newMessages.unshift(message);
+    }
+
+    console.log('completion:', messageStateRef.current);
+
     await chatCompletions(
       APIKey,
       model,
-      messagesState.messages,
+
+      systemPrompt ? [{ role: 'system', content: systemPrompt }, ...newMessages] : newMessages,
       (text: string) => {
-        setMessagesState(prevState => {
-          let newState: { messages: ChatMessage[]; incoming: boolean };
-          if (!prevState.incoming) {
-            newState = {
-              messages: [...prevState.messages, { role: 'assistant', content: text }],
-              incoming: true,
-            };
-          } else {
-            const newMessages = [...prevState.messages];
-            newMessages[newMessages.length - 1].content += text;
-            newState = {
-              ...prevState,
-              messages: newMessages,
-            };
-          }
-          console.log('new message', newState);
-          scrollToAnchor();
-          return newState;
+        setIncomingMessage((prev: string) => prev + text);
+        scrollToAnchor();
+      },
+      () => {
+        setIncomingMessage('');
+        console.log('completion started:', messageStateRef.current);
+      },
+      () => {
+        setIncomingMessage((prev: string) => {
+          addMessages([{ role: 'assistant', content: prev }]);
+          return null;
         });
-      },
-      () => {
-        console.log('completion started');
-      },
-      () => {
-        console.log('completion finished');
-        // add a new message for next message
-        setMessagesState(prevState => ({ ...prevState, incoming: false }));
+        scrollToAnchor();
+        console.log('completion finished:', messageStateRef.current);
       },
     );
   };
 
   useEffect(() => {
-    if (
-      messagesState.messages.length > 0 &&
-      messagesState.messages[messagesState.messages.length - 1].role === 'user' &&
-      !messagesState.incoming
-    ) {
-      sendChat().catch(err => alert(err));
-    }
+    console.log('messages state changed:', messagesState);
     textareaRef.current && textareaRef.current.focus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messagesState]);
 
   const handleInputChange = (event: { target: { value: SetStateAction<string> } }) => setInput(event.target.value);
 
+  const addMessages = (messages: ChatMessage[]) => {
+    console.log('add message:', messages);
+    storeNewMessages(sessionId, messages).then(async () => {
+      setMessagesState(prevState => {
+        const newMessages = [...prevState.messages, ...messages];
+        if (messages[messages.length - 1].role === 'user') {
+          sendChat(newMessages).catch(err => alert(err));
+        }
+        return {
+          messages: newMessages,
+          incoming: false,
+        };
+      });
+    });
+  };
+
   const onInputSend = () => {
-    setMessagesState(prevState => ({
-      messages: [...prevState.messages, { role: 'user', content: input }],
-      incoming: false,
-    }));
+    addMessages([{ role: 'user', content: input }]);
     setInput('');
   };
 
@@ -142,10 +171,10 @@ function ChatBox(
     };
   }, []);
 
-  const botMessageBg = useColorModeValue('#4ed1a2', 'gray.600');
-  const userMessageBg = useColorModeValue('#f6f7f9', 'gray.500');
+  const botMessageBg = useColorModeValue('#f6f7f9', 'gray.600');
+  const userMessageBg = useColorModeValue('#4ed1a2', 'gray.500');
   const userColor = useColorModeValue('black', 'white');
-  const botColor = useColorModeValue('white', 'white');
+  const botColor = useColorModeValue('black', 'white');
 
   return (
     <Container padding={0.5}>
@@ -160,7 +189,7 @@ function ChatBox(
                     <Card
                       width="max-content"
                       maxW="100%"
-                      backgroundColor={msg.role === 'user' ? botMessageBg : userMessageBg}
+                      backgroundColor={msg.role === 'user' ? userMessageBg : botMessageBg}
                       color={msg.role === 'user' ? userColor : botColor}
                       p={2}
                       borderRadius={12}>
@@ -168,6 +197,19 @@ function ChatBox(
                     </Card>
                   </ListItem>
                 ))}
+              {incomingMessage && (
+                <ListItem key={messagesState.messages.length} maxW="100%" paddingRight={3}>
+                  <Card
+                    width="max-content"
+                    maxW="100%"
+                    backgroundColor={botMessageBg}
+                    color={botColor}
+                    p={2}
+                    borderRadius={12}>
+                    <MarkdownSyntaxHighlight markdown={incomingMessage}></MarkdownSyntaxHighlight>
+                  </Card>
+                </ListItem>
+              )}
             </List>
           </Card>
         </Container>
@@ -183,7 +225,7 @@ function ChatBox(
               borderColor="gray.200"
               width="100%"
             />
-            <Flex position="absolute" bottom="8px" right="8px">
+            <Flex>
               <IconButton
                 onClick={clearMessages}
                 size="sm"
@@ -195,22 +237,6 @@ function ChatBox(
               <IconButton onClick={onInputSend} size="sm" aria-label="Send messages" icon={<Send />} zIndex={1} />
             </Flex>
           </Flex>
-          {/*<InputGroup>*/}
-          {/*  <Textarea*/}
-          {/*    ref={textareaRef}*/}
-          {/*    value={input}*/}
-          {/*    onChange={handleInputChange}*/}
-          {/*    onKeyDown={handleInputKeyDown}*/}
-          {/*    minH="max-content"*/}
-          {/*    padding={2}*/}
-          {/*    borderColor="gray.200"*/}
-          {/*    width="100%"*/}
-          {/*  />*/}
-          {/*  <InputRightElement>*/}
-          {/*    <IconButton onClick={clearMessages} size="sm" mr={2} aria-label="Clear messages" icon={<Clear />} />*/}
-          {/*    <IconButton onClick={onInputSend} size="sm" mr={4} aria-label="Send messages" icon={<Send />} />*/}
-          {/*  </InputRightElement>*/}
-          {/*</InputGroup>*/}
         </Container>
       </VStack>
     </Container>
