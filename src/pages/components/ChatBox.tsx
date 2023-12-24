@@ -1,6 +1,9 @@
 import {
+  AbsoluteCenter,
+  Box,
   Card,
   Container,
+  Divider,
   Flex,
   IconButton,
   List,
@@ -9,7 +12,7 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
-import { KeyboardEvent, MutableRefObject, SetStateAction, useEffect, useRef, useState } from 'react';
+import { KeyboardEvent, SetStateAction, useEffect, useRef, useState } from 'react';
 import { chatCompletions } from '@pages/common/chatgpt';
 import { Clear, Send } from '@pages/content/ui/Icons';
 import { ChatMessage } from '@pages/content/ui/types';
@@ -40,7 +43,7 @@ function ChatBox(
     maxH: '100%',
   },
 ) {
-  const [messagesState, setMessagesState] = useState({ messages: [], incoming: false });
+  const [messagesState, setMessagesState] = useState({ messages: [] });
   const [incomingMessage, setIncomingMessage] = useState(null);
   const [input, setInput] = useState(preInput);
 
@@ -60,7 +63,6 @@ function ChatBox(
         setMessagesState(() => {
           return {
             messages: messages,
-            incoming: false,
           };
         });
         // 2. add new messages to store and state
@@ -86,20 +88,15 @@ function ChatBox(
     addMessages([emptyMessage]);
   };
 
-  const messageStateRef: MutableRefObject<{ messages: ChatMessage[]; incoming: boolean }> = useRef();
-  messageStateRef.current = messagesState;
   const sendChat = async (messages: ChatMessage[]) => {
-    const newMessages = [...messages];
-    // iterate messages until got an empty one
+    let newMessages = [...messages];
+    // find the last empty message
     for (let i = messages.length - 1; i >= 0; i--) {
-      const message = messages[i];
-      if (message.role == null) {
+      if (messages[i].role == null) {
+        newMessages = messages.slice(i + 1);
         break;
       }
-      newMessages.unshift(message);
     }
-
-    console.log('completion:', messageStateRef.current);
 
     await chatCompletions(
       APIKey,
@@ -112,7 +109,7 @@ function ChatBox(
       },
       () => {
         setIncomingMessage('');
-        console.log('completion started:', messageStateRef.current);
+        console.log('completion started');
       },
       () => {
         setIncomingMessage((prev: string) => {
@@ -120,7 +117,7 @@ function ChatBox(
           return null;
         });
         scrollToAnchor();
-        console.log('completion finished:', messageStateRef.current);
+        console.log('completion finished');
       },
     );
   };
@@ -143,7 +140,6 @@ function ChatBox(
         }
         return {
           messages: newMessages,
-          incoming: false,
         };
       });
     });
@@ -175,6 +171,7 @@ function ChatBox(
   const userMessageBg = useColorModeValue('#4ed1a2', 'gray.500');
   const userColor = useColorModeValue('black', 'white');
   const botColor = useColorModeValue('black', 'white');
+  const bg = useColorModeValue('white', 'gray.700');
 
   return (
     <Container padding={0.5}>
@@ -186,15 +183,24 @@ function ChatBox(
                 .filter(msg => msg.role != 'system')
                 .map((msg, index) => (
                   <ListItem key={index} maxW="100%" paddingRight={3}>
-                    <Card
-                      width="max-content"
-                      maxW="100%"
-                      backgroundColor={msg.role === 'user' ? userMessageBg : botMessageBg}
-                      color={msg.role === 'user' ? userColor : botColor}
-                      p={2}
-                      borderRadius={12}>
-                      <MarkdownSyntaxHighlight markdown={msg.content}></MarkdownSyntaxHighlight>
-                    </Card>
+                    {msg.role == null ? (
+                      <Box position="relative" padding="10">
+                        <Divider color="gray.300" />
+                        <AbsoluteCenter bg={bg} color="gray.300" px={4}>
+                          New Conversation
+                        </AbsoluteCenter>
+                      </Box>
+                    ) : (
+                      <Card
+                        width="max-content"
+                        maxW="100%"
+                        backgroundColor={msg.role === 'user' ? userMessageBg : botMessageBg}
+                        color={msg.role === 'user' ? userColor : botColor}
+                        p={2}
+                        borderRadius={12}>
+                        <MarkdownSyntaxHighlight markdown={msg.content}></MarkdownSyntaxHighlight>
+                      </Card>
+                    )}
                   </ListItem>
                 ))}
               {incomingMessage && (
@@ -222,10 +228,11 @@ function ChatBox(
               onKeyDown={handleInputKeyDown}
               minH="max-content"
               padding={2}
+              paddingRight={20}
               borderColor="gray.200"
               width="100%"
             />
-            <Flex>
+            <Flex direction="row" position="absolute" bottom={1} right={1}>
               <IconButton
                 onClick={clearMessages}
                 size="sm"
