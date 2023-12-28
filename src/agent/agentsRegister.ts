@@ -2,7 +2,7 @@ import { browser } from 'webextension-polyfill-ts';
 import { storageSyncKey_Agents } from '@src/constants';
 import * as AgentWhatIs from './what_is.json';
 import * as AgentChat from './chat.json';
-import Agent from '@pages/agent/agent';
+import Agent from '@src/agent/agent';
 
 export default class AgentsLoader {
   private agents: Map<string, Agent>;

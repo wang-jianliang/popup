@@ -2,11 +2,11 @@
 // import { Field, Form, Formik } from 'formik';
 
 import { useFormik } from 'formik';
-import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Select, VStack } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, VStack } from '@chakra-ui/react';
 import { browser } from 'webextension-polyfill-ts';
-import { useEffect, useState } from 'react';
-import { fetchModels } from '@pages/common/chatgpt';
-import { defaultModel, storageSyncKey_APIKey, storageSyncKey_Model } from '@src/constants';
+import { useEffect } from 'react';
+import { storageSyncKey_Settings } from '@src/constants';
+import EngineSettings from '@src/engines/engineSettings';
 
 type Props = {
   onSaved: ((values: any) => void) | null;
@@ -14,13 +14,9 @@ type Props = {
 
 interface FormValues {
   apiKey: string;
-  model: string;
 }
 
 export default function Settings({ onSaved }: Props = { onSaved: null }) {
-  const [selectedModel, setSelectedModule] = useState(defaultModel);
-  const [models, setModels] = useState([]);
-
   const validate = (values: FormValues) => {
     const errors: Partial<FormValues> = {};
     const apiKey = values.apiKey;
@@ -33,12 +29,11 @@ export default function Settings({ onSaved }: Props = { onSaved: null }) {
   };
 
   const formik = useFormik({
-    initialValues: { apiKey: null, model: selectedModel },
+    initialValues: { apiKey: null },
     onSubmit: async (values, actions) => {
       await browser.storage.sync
         .set({
-          api_key: values.apiKey,
-          model: values.model,
+          settings: { apiKey: values.apiKey },
         })
         .then(() => {
           onSaved && onSaved(values);
@@ -52,22 +47,10 @@ export default function Settings({ onSaved }: Props = { onSaved: null }) {
     validate: validate,
   });
 
-  const doFetchModels = (apiKey: string) => {
-    if (apiKey) {
-      fetchModels(apiKey).then(fetchedModels => {
-        setModels(fetchedModels);
-      });
-    }
-  };
-
   useEffect(() => {
-    browser.storage.sync.get([storageSyncKey_APIKey, storageSyncKey_Model]).then(result => {
+    browser.storage.sync.get([storageSyncKey_Settings]).then((result: EngineSettings) => {
       console.log('load settings form storage', result);
-      formik.setFieldValue('apiKey', result[storageSyncKey_APIKey]);
-      result[storageSyncKey_Model] && setSelectedModule(result[storageSyncKey_Model]);
-      if (result[storageSyncKey_APIKey]) {
-        doFetchModels(result[storageSyncKey_APIKey]);
-      }
+      formik.setFieldValue('apiKey', result.apiKey);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -82,21 +65,10 @@ export default function Settings({ onSaved }: Props = { onSaved: null }) {
               {...formik.getFieldProps('apiKey')}
               onBlur={e => {
                 formik.handleBlur(e);
-                !formik.errors.apiKey && doFetchModels(formik.values.apiKey);
               }}
               placeholder="Please input your API key"
             />
             <FormErrorMessage>{formik.errors.apiKey}</FormErrorMessage>
-          </FormControl>
-          <FormControl isDisabled={!models || models.length == 0}>
-            <FormLabel>Model</FormLabel>
-            <Select {...formik.getFieldProps('model')}>
-              {models?.map(value => (
-                <option value={value.id} key={value.id}>
-                  {value.id}
-                </option>
-              ))}
-            </Select>
           </FormControl>
         </VStack>
         <Button mt={4} colorScheme="teal" isLoading={formik.isSubmitting} type="submit">

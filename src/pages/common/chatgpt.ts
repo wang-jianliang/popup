@@ -25,26 +25,26 @@ export class APIKeyError extends Error {
   }
 }
 
-// function printWords(sentence: string, callback: (word: string) => void, onFinished: () => void) {
-//   const words = sentence.split(' ');
-//   const printInterval = 1000 / 100;
-//   let i = 0;
-//
-//   function printWord() {
-//     if (i < words.length) {
-//       callback(words[i]);
-//       i++;
-//       setTimeout(printWord, printInterval);
-//     } else {
-//       onFinished();
-//     }
-//   }
-//
-//   printWord();
-// }
+function printWords(sentence: string, callback: (word: string) => void, onFinished: () => void) {
+  const words = sentence.split(' ');
+  const printInterval = 1000 / 100;
+  let i = 0;
 
-// const testMessage =
-//   'fa fafdasfe dfS FR3 ESFS F 23SFFFSFsFR2  FS AFAEFSA FSF SDFEFAEDF FER3FEWFDAFEW  EFE DSA FEQD FEAF';
+  function printWord() {
+    if (i < words.length) {
+      callback(words[i]);
+      i++;
+      setTimeout(printWord, printInterval);
+    } else {
+      onFinished();
+    }
+  }
+
+  printWord();
+}
+
+const testMessage =
+  'This is a test message for testing. There are many test messages in the world, but this one is mine.';
 
 const getAPIClient = async (APIKey: string) => {
   return new ApiClient({
@@ -59,8 +59,8 @@ const getAPIClient = async (APIKey: string) => {
 
 export async function fetchModels(APIKey: string) {
   // ================================================for debug==========================================================
-  // console.log('fetching models, apiKey:', APIKey);
-  // return ['model1', 'model2', 'gpt-3.5-turbo'];
+  console.log('fetching models, apiKey:', APIKey);
+  return ['model1', 'model2', 'gpt-3.5-turbo'];
   // ===================================================================================================================
 
   const client = await getAPIClient(APIKey);
@@ -81,9 +81,9 @@ export async function chatCompletions(
   console.log('complete chat', messages);
 
   // ================================================for debug==========================================================
-  // onStarted();
-  // printWords('aaa' + '\n' + testMessage, onMessageChunk, onFinished);
-  // return;
+  onStarted();
+  printWords(testMessage, onMessageChunk, onFinished);
+  return;
   // ===================================================================================================================
 
   const body = {

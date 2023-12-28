@@ -13,16 +13,19 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { KeyboardEvent, SetStateAction, useEffect, useRef, useState } from 'react';
-import { chatCompletions } from '@pages/common/chatgpt';
 import { Clear, Send } from '@pages/content/ui/Icons';
 import { ChatMessage } from '@pages/content/ui/types';
 import autosize from 'autosize';
 import MarkdownSyntaxHighlight from '@pages/components/Markdown';
 import { getMessages, storeNewMessages } from '@pages/storage/chat';
+import { getEngine } from '@src/engines/engineManager';
+import EngineSettings from '@src/engines/engineSettings';
+import { EngineType } from '@src/engines/engine';
 
 type Props = {
-  APIKey: string | null;
+  engineType: EngineType | null;
   model: string | null;
+  settings: EngineSettings | null;
   preInput?: string;
   sessionId: number;
   systemPrompt?: string;
@@ -33,9 +36,21 @@ type Props = {
 };
 
 function ChatBox(
-  { APIKey, model, preInput, sessionId, systemPrompt, newMessages, onClearMessages, minW, maxH }: Props = {
-    APIKey: null,
+  {
+    engineType,
+    model,
+    settings,
+    preInput,
+    sessionId,
+    systemPrompt,
+    newMessages,
+    onClearMessages,
+    minW,
+    maxH,
+  }: Props = {
+    engineType: null,
     model: null,
+    settings: null,
     preInput: null,
     sessionId: -1,
     newMessages: [],
@@ -98,10 +113,11 @@ function ChatBox(
       }
     }
 
-    await chatCompletions(
-      APIKey,
-      model,
+    // override model in settings
+    const engine = getEngine(engineType, settings);
 
+    await engine.complete(
+      model,
       systemPrompt ? [{ role: 'system', content: systemPrompt }, ...newMessages] : newMessages,
       (text: string) => {
         setIncomingMessage((prev: string) => prev + text);
@@ -119,6 +135,7 @@ function ChatBox(
         scrollToAnchor();
         console.log('completion finished');
       },
+      err => alert(err),
     );
   };
 

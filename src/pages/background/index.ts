@@ -1,6 +1,6 @@
 import { messageType_MenuClicked } from '@root/src/constants';
 import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
-import AgentsLoader from '@pages/agent/agentsRegister';
+import AgentsLoader from '@src/agent/agentsRegister';
 import { browser, Menus } from 'webextension-polyfill-ts';
 import OnClickData = Menus.OnClickData;
 

@@ -1,6 +1,6 @@
 import { Menus } from 'webextension-polyfill-ts';
 import OnClickData = Menus.OnClickData;
-import Agent from '@pages/agent/agent';
+import Agent from '@src/agent/agent';
 
 export type UserEventType = MouseEvent | TouchEvent | PointerEvent;
 

@@ -1,5 +1,6 @@
 {
   "name": "Chat with the bot",
+  "engine": "ChatGPT",
   "model": "gpt-3.5-turbo",
   "prompts": {
     "selection": "${selection}\n",

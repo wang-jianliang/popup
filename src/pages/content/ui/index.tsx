@@ -10,7 +10,7 @@ import EmotionCacheProvider from './EmotionCacheProvider';
 import CustomChakraProvider from './CustomChakraProvider';
 import { Box } from '@chakra-ui/react';
 import OnClickData = Menus.OnClickData;
-import Agent from '@pages/agent/agent';
+import Agent from '@src/agent/agent';
 
 refreshOnUpdate('pages/content');
 
