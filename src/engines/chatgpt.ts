@@ -14,27 +14,29 @@ interface Model {
   latest_checkpoint_human_readable: string;
 }
 
-function printWords(sentence: string, callback: (word: string) => void, onFinished: () => void) {
-  const words = sentence.split(' ');
-  const printInterval = 1000 / 100;
-  let i = 0;
+// ================================================for debug==========================================================
+// function printWords(sentence: string, callback: (word: string) => void, onFinished: () => void) {
+//   const words = sentence.split(' ');
+//   const printInterval = 1000 / 100;
+//   let i = 0;
+//
+//   function printWord() {
+//     if (i < words.length) {
+//       callback(words[i]);
+//       i++;
+//       setTimeout(printWord, printInterval);
+//     } else {
+//       onFinished();
+//     }
+//   }
+//
+//   printWord();
+// }
+//
+// const testMessage =
+//   'This is a test message for testing. There are many test messages in the world, but this one is mine.';
 
-  function printWord() {
-    if (i < words.length) {
-      callback(words[i]);
-      i++;
-      setTimeout(printWord, printInterval);
-    } else {
-      onFinished();
-    }
-  }
-
-  printWord();
-}
-
-const testMessage =
-  'This is a test message for testing. There are many test messages in the world, but this one is mine.';
-
+// ===================================================================================================================
 export class ChatGPT implements Engine {
   private readonly client: ApiClient;
 
@@ -75,9 +77,9 @@ export class ChatGPT implements Engine {
 
     console.log('complete chat', messages);
     // ================================================for debug==========================================================
-    onStarted();
-    printWords(testMessage, onMessageChunk, onFinished);
-    return;
+    // onStarted();
+    // printWords(testMessage, onMessageChunk, onFinished);
+    // return;
     // ===================================================================================================================
 
     const body = {
