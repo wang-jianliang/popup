@@ -47,7 +47,7 @@ const SidePanel = () => {
         {currentSessionId && sessions[currentSessionId]?.title}
       </GridItem>
       <GridItem area={'nav'} bgColor="gray.50">
-        <List spacing={3} padding={2}>
+        <List spacing={3} padding={2} overflowY="auto" maxH="100%">
           {Array.from(sessions).map(([id, session]) => {
             return (
               <ListItem key={id} width="100%">
