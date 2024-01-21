@@ -11,14 +11,14 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import Settings from '@pages/components/Settings';
 import { storageSyncKey_Settings } from '@src/constants';
 import { browser, Menus } from 'webextension-polyfill-ts';
 import Agent from '@src/agent/agent';
-import OnClickData = Menus.OnClickData;
 import { SettingsIcon } from '@chakra-ui/icons';
 import { createNewSession } from '@pages/content/storageUtils';
 import EngineSettings from '@src/engines/engineSettings';
+import Settings from '@pages/content/Settings/Settings';
+import OnClickData = Menus.OnClickData;
 
 interface Props {
   agent?: Agent;
@@ -73,28 +73,29 @@ export default function App(props: Props) {
       const settings: EngineSettings = result[storageSyncKey_Settings];
       setSettings(settings);
     });
-  }, []);
+  }, [showSettings]);
 
   return (
-    <Card bg={bgColor} color={color} lineHeight={5} maxW="100%" zIndex={10000}>
-      <Flex p={2}>
-        {settings?.apiKey && <Button p={2}>{agent.name}</Button>}
-        <IconButton
-          aria-label="Open settings"
-          icon={<SettingsIcon />}
-          marginLeft={2}
-          onClick={() => setShowSettings(true)}
-        />
-        <Spacer />
-        <CloseButton p={2} size="md" onClick={onClose} />
-      </Flex>
+    <Card bg={bgColor} color={color} lineHeight={5} maxW="100%" maxWidth="600px" zIndex={10000}>
+      {!showSettings && (
+        <Flex p={2}>
+          {settings?.apiKey && <Button p={2}>{agent.name}</Button>}
+          <IconButton
+            aria-label="Open settings"
+            icon={<SettingsIcon />}
+            marginLeft={2}
+            onClick={() => setShowSettings(true)}
+          />
+          <Spacer />
+          <CloseButton p={2} size="md" onClick={onClose} />
+        </Flex>
+      )}
       {!settings || !settings.apiKey || showSettings ? (
-        <Box width="500px">
+        <Box width="600px">
           <Settings
-            onSaved={values => {
-              console.log('on settings saved: ', values);
+            onClosed={() => {
+              console.log('on settings closed');
               setShowSettings(false);
-              setSettings(values);
             }}
           />
         </Box>

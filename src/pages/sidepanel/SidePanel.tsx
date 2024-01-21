@@ -31,6 +31,8 @@ const SidePanel = () => {
     });
   }, []);
 
+  console.log('sessions', sessions);
+
   return (
     <Grid
       templateAreas={`"nav header"

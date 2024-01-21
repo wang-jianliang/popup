@@ -2,6 +2,7 @@ import {
   AbsoluteCenter,
   Box,
   Card,
+  Center,
   Container,
   Divider,
   Flex,
@@ -21,6 +22,7 @@ import { getMessages, storeNewMessages } from '@pages/content/storageUtils';
 import { getEngine } from '@src/engines/engineManager';
 import EngineSettings from '@src/engines/engineSettings';
 import { EngineType } from '@src/engines/engine';
+import { RepeatIcon } from '@chakra-ui/icons';
 
 type Props = {
   engineType: EngineType | null;
@@ -167,6 +169,10 @@ function ChatBox(
     setInput('');
   };
 
+  const onRetry = () => {
+    sendChat(messagesState.messages).catch(err => alert(err));
+  };
+
   const handleInputKeyDown = (event: KeyboardEvent) => {
     console.log('handle key event:', event);
     switch (event.key) {
@@ -175,6 +181,10 @@ function ChatBox(
           onInputSend();
         }
     }
+  };
+
+  const isCompleteChat = (messages: ChatMessage[]) => {
+    return messages[messages.length - 1].role === 'assistant';
   };
 
   useEffect(() => {
@@ -208,15 +218,32 @@ function ChatBox(
                         </AbsoluteCenter>
                       </Box>
                     ) : (
-                      <Card
-                        width="max-content"
-                        maxW="100%"
-                        backgroundColor={msg.role === 'user' ? userMessageBg : botMessageBg}
-                        color={msg.role === 'user' ? userColor : botColor}
-                        p={2}
-                        borderRadius={12}>
-                        <MarkdownSyntaxHighlight markdown={msg.content}></MarkdownSyntaxHighlight>
-                      </Card>
+                      <Flex>
+                        <Card
+                          width="max-content"
+                          maxW="100%"
+                          backgroundColor={msg.role === 'user' ? userMessageBg : botMessageBg}
+                          color={msg.role === 'user' ? userColor : botColor}
+                          p={2}
+                          borderRadius={12}>
+                          <MarkdownSyntaxHighlight markdown={msg.content}></MarkdownSyntaxHighlight>
+                        </Card>
+                        {
+                          /* show retry button if the message is not completed */
+                          index === messagesState.messages.length - 1 && !isCompleteChat(messagesState.messages) && (
+                            <Center>
+                              <IconButton
+                                onClick={onRetry}
+                                aria-label={'Retry'}
+                                icon={<RepeatIcon />}
+                                size="xs"
+                                ml={2}
+                                mt={1}
+                              />
+                            </Center>
+                          )
+                        }
+                      </Flex>
                     )}
                   </ListItem>
                 ))}

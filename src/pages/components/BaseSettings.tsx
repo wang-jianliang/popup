@@ -8,15 +8,11 @@ import { useEffect } from 'react';
 import { storageSyncKey_Settings } from '@src/constants';
 import EngineSettings from '@src/engines/engineSettings';
 
-type Props = {
-  onSaved: ((values: any) => void) | null;
-};
-
 interface FormValues {
   apiKey: string;
 }
 
-export default function Settings({ onSaved }: Props = { onSaved: null }) {
+export default function BaseSettings() {
   const validate = (values: FormValues) => {
     const errors: Partial<FormValues> = {};
     const apiKey = values.apiKey;
@@ -36,7 +32,6 @@ export default function Settings({ onSaved }: Props = { onSaved: null }) {
           settings: { apiKey: values.apiKey },
         })
         .then(() => {
-          onSaved && onSaved(values);
           actions.setSubmitting(false);
           console.log('settings saved', values);
         })
