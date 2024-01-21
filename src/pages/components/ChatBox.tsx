@@ -191,10 +191,10 @@ function ChatBox(
   const bg = useColorModeValue('white', 'gray.700');
 
   return (
-    <Container padding={0.5}>
-      <VStack>
-        <Container padding={1}>
-          <Card padding={3} boxShadow="inset 0 0 1px #A0AEC0">
+    <Flex padding={0.5} h="100%">
+      <VStack minW="100%">
+        <Box padding={1} h="100%" w="100%">
+          <Box borderRadius="lg" h="100%" w="100%" padding={3} boxShadow="inset 0 0 1px #A0AEC0">
             <List ref={messagesEndRef} spacing={3} minW={minW} maxH={maxH} overflow="auto" paddingBottom={2}>
               {messagesState.messages
                 .filter(msg => msg.role != 'system')
@@ -234,9 +234,9 @@ function ChatBox(
                 </ListItem>
               )}
             </List>
-          </Card>
-        </Container>
-        <Container padding={1}>
+          </Box>
+        </Box>
+        <Container padding={1} maxW="100%">
           <Flex position="relative">
             <Textarea
               ref={textareaRef}
@@ -263,7 +263,7 @@ function ChatBox(
           </Flex>
         </Container>
       </VStack>
-    </Container>
+    </Flex>
   );
 }
 

@@ -2,6 +2,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import rangeParser from 'parse-numeric-range';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import Markdown from 'react-markdown';
+import ChakraUIRenderer from 'chakra-ui-markdown-renderer';
+import { Box } from '@chakra-ui/react';
 
 type MarkdownProps = {
   markdown: string & { content?: string };
@@ -47,7 +49,18 @@ const MarkdownSyntaxHighlight = ({ markdown }: MarkdownProps) => {
     },
   };
 
-  return <Markdown components={markdownComponents}>{markdown}</Markdown>;
+  const newTheme = {
+    p: (props: any) => {
+      const { children } = props;
+      return (
+        <Box fontSize="14px" fontWeight="normal">
+          {children}
+        </Box>
+      );
+    },
+    ...markdownComponents,
+  };
+  return <Markdown components={ChakraUIRenderer(newTheme)}>{markdown}</Markdown>;
 };
 
 export default MarkdownSyntaxHighlight;
