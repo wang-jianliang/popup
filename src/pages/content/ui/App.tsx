@@ -103,8 +103,6 @@ export default function App(props: Props) {
         <CardBody padding="2">
           {sessionId > 0 && (
             <ChatBox
-              engineType={agent.engine}
-              model={agent.model}
               settings={settings}
               preInput={input}
               systemPrompt={agent.systemPrompt}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import '@pages/sidepanel/SidePanel.css';
 import withSuspense from '@src/shared/hoc/withSuspense';
 import withErrorBoundary from '@src/shared/hoc/withErrorBoundary';
-import { Box, Grid, GridItem, List, ListItem } from '@chakra-ui/react';
+import { Box, Button, Center, Divider, Grid, GridItem, List, ListItem, Text } from '@chakra-ui/react';
 import { ChatSession, getSessions } from '@pages/storage/chat';
 import ChatBox from '@pages/components/ChatBox';
 import EngineSettings from '@src/engines/engineSettings';
@@ -32,12 +32,13 @@ const SidePanel = () => {
   }, []);
 
   console.log('sessions', sessions);
+  console.log('currentSessionId', currentSessionId);
 
   return (
     <Grid
       templateAreas={`"nav header"
                   "nav main"`}
-      gridTemplateRows={'30px 1fr'}
+      gridTemplateRows={'0px 1fr'}
       gridTemplateColumns={'30% 68%'}
       h="100vh"
       gap="0.5"
@@ -47,6 +48,20 @@ const SidePanel = () => {
         {currentSessionId && sessions[currentSessionId]?.title}
       </GridItem>
       <GridItem area={'nav'} bgColor="gray.50">
+        {/*<Box>*/}
+        {/*  <Heading size="md" p={2}>*/}
+        {/*    Conversations*/}
+        {/*  </Heading>*/}
+        {/*</Box>*/}
+        <Box p={2}>
+          <Button width="100%">New Chat</Button>
+        </Box>
+        <Divider />
+        {sessions.size == 0 && (
+          <Center>
+            <Text>No conversations</Text>
+          </Center>
+        )}
         <List spacing={3} padding={2} overflowY="auto" maxH="100%">
           {Array.from(sessions).map(([id, session]) => {
             return (

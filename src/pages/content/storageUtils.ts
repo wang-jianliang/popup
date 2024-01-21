@@ -29,6 +29,7 @@ export const createNewSession = async (title: string, agent: Agent) => {
 };
 
 export const getSession = async (sessionId: number): Promise<ChatSession> => {
+  console.log('getSession, sessionId:', sessionId);
   return browser.runtime.sendMessage({ command: 'getSession', data: sessionId });
 };
 

@@ -6,9 +6,11 @@ import {
   Container,
   Divider,
   Flex,
+  Heading,
   IconButton,
   List,
   ListItem,
+  Text,
   Textarea,
   useColorModeValue,
   VStack,
@@ -18,15 +20,13 @@ import { Clear, Send } from '@pages/content/ui/Icons';
 import { ChatMessage } from '@pages/content/ui/types';
 import autosize from 'autosize';
 import MarkdownSyntaxHighlight from '@pages/components/Markdown';
-import { getMessages, storeNewMessages } from '@pages/content/storageUtils';
+import { getMessages, getSession, storeNewMessages } from '@pages/content/storageUtils';
 import { getEngine } from '@src/engines/engineManager';
 import EngineSettings from '@src/engines/engineSettings';
-import { EngineType } from '@src/engines/engine';
 import { RepeatIcon } from '@chakra-ui/icons';
+import { ChatSession } from '@pages/storage/chat';
 
 type Props = {
-  engineType: EngineType | null;
-  model: string | null;
   settings: EngineSettings | null;
   preInput?: string;
   sessionId: number;
@@ -38,20 +38,7 @@ type Props = {
 };
 
 function ChatBox(
-  {
-    engineType,
-    model,
-    settings,
-    preInput,
-    sessionId,
-    systemPrompt,
-    newMessages,
-    onClearMessages,
-    minW,
-    maxH,
-  }: Props = {
-    engineType: null,
-    model: null,
+  { settings, preInput, sessionId, systemPrompt, newMessages, onClearMessages, minW, maxH }: Props = {
     settings: null,
     preInput: null,
     sessionId: -1,
@@ -63,6 +50,8 @@ function ChatBox(
   const [messagesState, setMessagesState] = useState({ messages: [] });
   const [incomingMessage, setIncomingMessage] = useState(null);
   const [input, setInput] = useState(preInput);
+  const [session, setSession] = useState<ChatSession | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -71,10 +60,17 @@ function ChatBox(
     messagesEndRef.current?.scrollBy({ top: messagesEndRef.current.scrollHeight });
   };
 
+  useEffect(() => {
+    if (sessionId >= 0) {
+      getSession(sessionId).then(session => {
+        setSession(session);
+      });
+    }
+  }, [sessionId]);
+
   // load messages from storage
   useEffect(() => {
-    console.log('session id:', sessionId);
-    if (sessionId >= 0) {
+    if (session) {
       getMessages(sessionId).then(messages => {
         // 1. load message history to state
         setMessagesState(() => {
@@ -83,11 +79,11 @@ function ChatBox(
           };
         });
         // 2. add new messages to store and state
-        newMessages.length > 0 && addMessages(newMessages);
+        newMessages && newMessages.length > 0 && addMessages(newMessages);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, [session]);
 
   // move cursor to the end
   useEffect(() => {
@@ -106,6 +102,7 @@ function ChatBox(
   };
 
   const sendChat = async (messages: ChatMessage[]) => {
+    setGenerating(true);
     let newMessages = [...messages];
     // find the last empty message
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -116,10 +113,10 @@ function ChatBox(
     }
 
     // override model in settings
-    const engine = getEngine(engineType, settings);
+    const engine = getEngine(session.agent.engine, settings);
 
     await engine.complete(
-      model,
+      session.agent.model,
       systemPrompt ? [{ role: 'system', content: systemPrompt }, ...newMessages] : newMessages,
       (text: string) => {
         setIncomingMessage((prev: string) => prev + text);
@@ -135,9 +132,13 @@ function ChatBox(
           return null;
         });
         scrollToAnchor();
+        setGenerating(false);
         console.log('completion finished');
       },
-      err => alert(err),
+      err => {
+        setGenerating(false);
+        alert(err);
+      },
     );
   };
 
@@ -203,6 +204,11 @@ function ChatBox(
   return (
     <Flex padding={0.5} h="100%">
       <VStack minW="100%">
+        <Box padding={1}>
+          <Heading size="sm" paddingX={2}>
+            {session?.title}
+          </Heading>
+        </Box>
         <Box padding={1} h="100%" w="100%">
           <Box borderRadius="lg" h="100%" w="100%" padding={3} boxShadow="inset 0 0 1px #A0AEC0">
             <List ref={messagesEndRef} spacing={3} minW={minW} maxH={maxH} overflow="auto" paddingBottom={2}>
@@ -232,14 +238,18 @@ function ChatBox(
                           /* show retry button if the message is not completed */
                           index === messagesState.messages.length - 1 && !isCompleteChat(messagesState.messages) && (
                             <Center>
-                              <IconButton
-                                onClick={onRetry}
-                                aria-label={'Retry'}
-                                icon={<RepeatIcon />}
-                                size="xs"
-                                ml={2}
-                                mt={1}
-                              />
+                              {generating ? (
+                                <Text padding={1}>Generating...</Text>
+                              ) : (
+                                <IconButton
+                                  onClick={onRetry}
+                                  aria-label={'Retry'}
+                                  icon={<RepeatIcon />}
+                                  size="xs"
+                                  ml={2}
+                                  mt={1}
+                                />
+                              )}
                             </Center>
                           )
                         }
