@@ -99,6 +99,35 @@ class ObjectStore<T> {
     });
   }
 
+  async queryItems(query: string): Promise<T[]> {
+    if (!this.db) {
+      throw new Error('Database is not open');
+    }
+
+    return new Promise<T[]>((resolve, reject) => {
+      const tx = this.db.transaction(this.storeName, 'readonly');
+      const store = tx.objectStore(this.storeName);
+      const request = store.openCursor();
+      const items: T[] = [];
+
+      request.onsuccess = () => {
+        const cursor = request.result as IDBCursorWithValue;
+        if (cursor) {
+          if (cursor.value.toString().includes(query)) {
+            items.push(cursor.value as T);
+          }
+          cursor.continue();
+        } else {
+          resolve(items);
+        }
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  }
+
   async loadItem(id: number): Promise<T | undefined> {
     if (!this.db) {
       throw new Error('Database is not open');

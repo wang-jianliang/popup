@@ -2,7 +2,7 @@ import { messageType_MenuClicked } from '@root/src/constants';
 import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
 import AgentsLoader from '@src/agent/agentsRegister';
 import { browser, Menus } from 'webextension-polyfill-ts';
-import { createNewSession, getMessages, storeNewMessage, storeNewMessages, updateMessage } from '@pages/storage/chat';
+import { createNewSession, getMessages, saveMessage, saveMessages, updateMessage } from '@pages/storage/chat';
 import { getSessions } from '@pages/content/storageUtils';
 import OnClickData = Menus.OnClickData;
 
@@ -52,9 +52,9 @@ browser.runtime.onMessage.addListener(async (message: { command: string; data: a
     case 'updateMessage':
       return await updateMessage(message.data.id, message.data.message);
     case 'storeNewMessages':
-      return await storeNewMessages(message.data.sessionId, message.data.messages);
+      return await saveMessages(message.data.sessionId, message.data.messages);
     case 'storeNewMessage':
-      return await storeNewMessage(message.data.sessionId, message.data.message);
+      return await saveMessage(message.data.sessionId, message.data.message);
     case 'getSessions':
       return await getSessions(message.data);
     default:

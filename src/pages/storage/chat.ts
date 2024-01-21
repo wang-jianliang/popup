@@ -9,7 +9,7 @@ export interface ChatSession {
   agent: Agent;
 }
 
-export const storeNewMessage = async (sessionId: number, message: ChatMessage): Promise<number> => {
+export const saveMessage = async (sessionId: number, message: ChatMessage): Promise<number> => {
   console.log('storeNewMessage:', sessionId, message);
   const messageStore: ObjectStore<ChatMessage> = await new ObjectStore<ChatMessage>('message').open();
   const sessionStore: ObjectStore<ChatSession> = await new ObjectStore<ChatSession>('session').open();
@@ -23,7 +23,7 @@ export const storeNewMessage = async (sessionId: number, message: ChatMessage): 
   });
 };
 
-export const storeNewMessages = async (sessionId: number, messages: ChatMessage[]): Promise<void> => {
+export const saveMessages = async (sessionId: number, messages: ChatMessage[]): Promise<void> => {
   console.log('store new messages:', messages);
 
   const messageStore: ObjectStore<ChatMessage> = await new ObjectStore<ChatMessage>('message').open();
