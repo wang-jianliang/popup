@@ -17,7 +17,7 @@ import { browser, Menus } from 'webextension-polyfill-ts';
 import Agent from '@src/agent/agent';
 import OnClickData = Menus.OnClickData;
 import { SettingsIcon } from '@chakra-ui/icons';
-import { createNewSession } from '@pages/storage/chat';
+import { createNewSession } from '@pages/content/storageUtils';
 import EngineSettings from '@src/engines/engineSettings';
 
 interface Props {
@@ -57,7 +57,7 @@ export default function App(props: Props) {
         setInput(prompt);
       }
 
-      createNewSession(prompt).then(id => setSessionId(id));
+      createNewSession(prompt, agent).then(id => setSessionId(id));
     } else {
       alert('Prompt is empty');
     }
@@ -76,7 +76,7 @@ export default function App(props: Props) {
   }, []);
 
   return (
-    <Card bg={bgColor} color={color} lineHeight={5} maxW="100%">
+    <Card bg={bgColor} color={color} lineHeight={5} maxW="100%" zIndex={10000}>
       <Flex p={2}>
         {settings?.apiKey && <Button p={2}>{agent.name}</Button>}
         <IconButton

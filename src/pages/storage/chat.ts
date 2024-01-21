@@ -1,10 +1,12 @@
 import ObjectStore from '@pages/storage/db';
 import { ChatMessage } from '@pages/content/ui/types';
+import Agent from '@src/agent/agent';
 
-interface ChatSession {
+export interface ChatSession {
   title: string;
   messageIds: number[];
   currentMessageId: number;
+  agent: Agent;
 }
 
 export const storeNewMessage = async (sessionId: number, message: ChatMessage): Promise<number> => {
@@ -49,10 +51,10 @@ export const getMessages = async (sessionId: number): Promise<ChatMessage[]> => 
   return await Promise.all(session.messageIds.map(async msgId => await messageStore.loadItem(msgId)));
 };
 
-export const createNewSession = async (title: string) => {
+export const createNewSession = async (title: string, agent: Agent) => {
   console.log('createNewSession, title:', title);
   const sessionStore: ObjectStore<ChatSession> = await new ObjectStore<ChatSession>('session').open();
-  const id = await sessionStore.saveItem({ title, messageIds: [], currentMessageId: 0 });
+  const id = await sessionStore.saveItem({ title, messageIds: [], currentMessageId: 0, agent });
   console.log(`session created: ${id}`);
   return id;
 };
@@ -60,4 +62,10 @@ export const createNewSession = async (title: string) => {
 export const getSession = async (sessionId: number): Promise<ChatSession> => {
   const sessionStore: ObjectStore<ChatSession> = await new ObjectStore<ChatSession>('session').open();
   return await sessionStore.loadItem(sessionId);
+};
+
+export const getSessions = async (maxCount: number): Promise<Map<number, ChatSession>> => {
+  console.log('getSessions, maxCount:', maxCount);
+  const sessionStore: ObjectStore<ChatSession> = await new ObjectStore<ChatSession>('session').open();
+  return await sessionStore.loadItems(maxCount);
 };

@@ -17,7 +17,7 @@ import { Clear, Send } from '@pages/content/ui/Icons';
 import { ChatMessage } from '@pages/content/ui/types';
 import autosize from 'autosize';
 import MarkdownSyntaxHighlight from '@pages/components/Markdown';
-import { getMessages, storeNewMessages } from '@pages/storage/chat';
+import { getMessages, storeNewMessages } from '@pages/content/storageUtils';
 import { getEngine } from '@src/engines/engineManager';
 import EngineSettings from '@src/engines/engineSettings';
 import { EngineType } from '@src/engines/engine';
@@ -85,7 +85,7 @@ function ChatBox(
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sessionId]);
 
   // move cursor to the end
   useEffect(() => {

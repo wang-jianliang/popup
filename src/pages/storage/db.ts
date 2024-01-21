@@ -21,11 +21,12 @@ class ObjectStore<T> {
         resolve(this);
         return;
       }
-      console.log('try open db');
+      console.log(`try open db ${databaseName}`);
 
       const request = indexedDB.open(databaseName, 1);
 
       request.onsuccess = e => {
+        console.log('onsuccess');
         ObjectStore.db = (e.target as IDBOpenDBRequest).result;
         resolve(this);
       };
@@ -114,6 +115,35 @@ class ObjectStore<T> {
           resolve(item);
         } else {
           resolve(undefined);
+        }
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  }
+
+  // Load items from the object store, return the maxCount items at most
+  async loadItems(maxCount: number): Promise<Map<number, T>> {
+    if (!this.db) {
+      throw new Error('Database is not open');
+    }
+
+    return new Promise<Map<number, T>>((resolve, reject) => {
+      const tx = this.db.transaction(this.storeName, 'readonly');
+      const store = tx.objectStore(this.storeName);
+      const request = store.openCursor();
+      // const request = store.getAll(null, maxCount);
+      const items: Map<number, T> = new Map<number, T>();
+
+      request.onsuccess = () => {
+        const cursor = request.result as IDBCursorWithValue;
+        if (cursor && items.size < maxCount) {
+          items.set(cursor.primaryKey as number, cursor.value as T);
+          cursor.continue();
+        } else {
+          resolve(items);
         }
       };
 
