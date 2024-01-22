@@ -8,6 +8,7 @@ import ChatBox from '@pages/components/ChatBox';
 import EngineSettings from '@src/engines/engineSettings';
 import { browser } from 'webextension-polyfill-ts';
 import { storageSyncKey_Settings } from '@src/constants';
+import { globalConfigKey_CurrentSessionId, loadGlobalConfig, saveGlobalConfig } from '@pages/storage/global';
 
 const SidePanel = () => {
   const [sessions, setSessions] = useState<Map<number, ChatSession>>(new Map<number, ChatSession>());
@@ -26,7 +27,9 @@ const SidePanel = () => {
       console.log('sessions', sessions);
       if (sessions.size > 0) {
         setSessions(sessions);
-        setCurrentSessionId(sessions.keys().next().value);
+        loadGlobalConfig(globalConfigKey_CurrentSessionId).then(id => {
+          setCurrentSessionId(id || sessions.keys().next().value);
+        });
       }
     });
   }, []);
@@ -72,8 +75,9 @@ const SidePanel = () => {
                   borderRadius="lg"
                   bgColor="white"
                   borderColor={currentSessionId === id ? 'blue.500' : 'gray.200'}
-                  onClick={() => {
+                  onClick={async () => {
                     setCurrentSessionId(id);
+                    await saveGlobalConfig(globalConfigKey_CurrentSessionId, id);
                   }}>
                   <Box w="100%" fontSize="small" whiteSpace="normal">
                     {session.title}
@@ -88,14 +92,7 @@ const SidePanel = () => {
         </List>
       </GridItem>
       <GridItem pl="2" area={'main'}>
-        {currentSessionId && (
-          <ChatBox
-            engineType={sessions[currentSessionId]?.agent.engine}
-            model={sessions[currentSessionId]?.agent.model}
-            settings={settings}
-            sessionId={currentSessionId}
-          />
-        )}
+        {currentSessionId && <ChatBox settings={settings} sessionId={currentSessionId} />}
       </GridItem>
     </Grid>
   );

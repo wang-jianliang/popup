@@ -1,6 +1,6 @@
 import { databaseName } from '@src/constants';
 
-const storeNames = ['message', 'session'];
+const storeNames = ['message', 'session', 'global'];
 
 class ObjectStore<T> {
   static db: IDBDatabase | null = null;
@@ -78,6 +78,27 @@ class ObjectStore<T> {
     });
   }
 
+  async saveItemWithKey(item: T, key: string): Promise<number> {
+    if (!this.db) {
+      throw new Error('Database is not open');
+    }
+
+    return new Promise<number>((resolve, reject) => {
+      const tx = this.db.transaction(this.storeName, 'readwrite');
+      const store = tx.objectStore(this.storeName);
+      const request = store.put(item, key);
+
+      request.onsuccess = event => {
+        const id: number = (event.target as IDBRequest).result;
+        resolve(id);
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  }
+
   async saveItem(item: T): Promise<number> {
     if (!this.db) {
       throw new Error('Database is not open');
@@ -128,7 +149,7 @@ class ObjectStore<T> {
     });
   }
 
-  async loadItem(id: number): Promise<T | undefined> {
+  async loadItem(id: number | string): Promise<T | undefined> {
     if (!this.db) {
       throw new Error('Database is not open');
     }
