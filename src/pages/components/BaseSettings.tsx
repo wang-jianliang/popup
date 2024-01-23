@@ -67,7 +67,7 @@ export default function BaseSettings() {
           </FormControl>
         </VStack>
         <Button mt={4} colorScheme="teal" isLoading={formik.isSubmitting} type="submit">
-          Submit
+          Save
         </Button>
       </form>
     </Box>

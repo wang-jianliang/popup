@@ -68,12 +68,23 @@ export default function App(props: Props) {
   const bgColor = useColorModeValue('white', 'gray.700');
   const color = useColorModeValue('gray.700', 'white');
 
-  useEffect(() => {
+  const loadSettings = () => {
     browser.storage.sync.get([storageSyncKey_Settings]).then(result => {
       const settings: EngineSettings = result[storageSyncKey_Settings];
       setSettings(settings);
+      setShowSettings(false);
     });
-  }, [showSettings]);
+  };
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  useEffect(() => {
+    if (!settings) {
+      setShowSettings(true);
+    }
+  }, [settings]);
 
   return (
     <Card bg={bgColor} color={color} lineHeight={5} maxW="100%" maxWidth="600px" zIndex={10000}>
@@ -90,11 +101,12 @@ export default function App(props: Props) {
           <CloseButton p={2} size="md" onClick={onClose} />
         </Flex>
       )}
-      {!settings || !settings.apiKey || showSettings ? (
+      {showSettings ? (
         <Box width="600px">
           <Settings
             onClosed={() => {
               console.log('on settings closed');
+              loadSettings();
               setShowSettings(false);
             }}
           />

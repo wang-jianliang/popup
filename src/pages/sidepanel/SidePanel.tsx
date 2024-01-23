@@ -52,11 +52,6 @@ const SidePanel = () => {
         {currentSessionId && sessions[currentSessionId]?.title}
       </GridItem>
       <GridItem area={'nav'} bgColor="gray.50">
-        {/*<Box>*/}
-        {/*  <Heading size="md" p={2}>*/}
-        {/*    Conversations*/}
-        {/*  </Heading>*/}
-        {/*</Box>*/}
         <Box p={2}>
           <Button width="100%">New Chat</Button>
         </Box>
