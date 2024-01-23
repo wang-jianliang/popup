@@ -69,3 +69,9 @@ export const getSessions = async (maxCount: number): Promise<Map<number, ChatSes
   const sessionStore: ObjectStore<ChatSession> = await new ObjectStore<ChatSession>('session').open();
   return await sessionStore.loadItems(maxCount);
 };
+
+export const deleteSession = async (sessionId: number): Promise<void> => {
+  console.log('deleteSession, sessionId:', sessionId);
+  const sessionStore: ObjectStore<ChatSession> = await new ObjectStore<ChatSession>('session').open();
+  await sessionStore.deleteItem(sessionId);
+};

@@ -2,26 +2,14 @@ import React, { useEffect, useState } from 'react';
 import '@pages/sidepanel/SidePanel.css';
 import withSuspense from '@src/shared/hoc/withSuspense';
 import withErrorBoundary from '@src/shared/hoc/withErrorBoundary';
-import {
-  Box,
-  Button,
-  Center,
-  CloseButton,
-  Divider,
-  Flex,
-  Grid,
-  GridItem,
-  IconButton,
-  List,
-  ListItem,
-  Text,
-} from '@chakra-ui/react';
-import { ChatSession, getSessions } from '@pages/storage/chat';
+import { Box, Button, Center, Divider, Grid, GridItem, Text } from '@chakra-ui/react';
+import { ChatSession, deleteSession, getSessions } from '@pages/storage/chat';
 import ChatBox from '@pages/components/ChatBox';
 import EngineSettings from '@src/engines/engineSettings';
 import { browser } from 'webextension-polyfill-ts';
 import { storageSyncKey_Settings } from '@src/constants';
 import { globalConfigKey_CurrentSessionId, loadGlobalConfig, saveGlobalConfig } from '@pages/storage/global';
+import { SessionList } from '@pages/sidepanel/SessionList';
 
 const SidePanel = () => {
   const [sessions, setSessions] = useState<Map<number, ChatSession>>(new Map<number, ChatSession>());
@@ -78,41 +66,27 @@ const SidePanel = () => {
             <Text>No conversations</Text>
           </Center>
         )}
-        <List spacing={3} padding={2} overflowY="auto" maxH="100%">
-          {Array.from(sessions).map(([id, session]) => {
-            return (
-              <ListItem key={id} width="100%">
-                <Box
-                  p={2}
-                  borderWidth="1px"
-                  borderRadius="lg"
-                  bgColor="white"
-                  borderColor={currentSessionId === id ? 'blue.500' : 'gray.200'}
-                  onClick={async () => {
-                    setCurrentSessionId(id);
-                    await saveGlobalConfig(globalConfigKey_CurrentSessionId, id);
-                  }}>
-                  <Flex justifyContent="space-between">
-                    <Box w="100%" fontSize="small" whiteSpace="normal">
-                      {session.title}
-                    </Box>
-                    <Box w="5%" />
-                    <IconButton
-                      variant="outline"
-                      size="xs"
-                      aria-label={'Delete'}
-                      icon={<CloseButton />}
-                      onClick={() => {}}
-                    />
-                  </Flex>
-                  <Box as="span" color="gray.400" fontSize="xsm">
-                    {session.messageIds.length} messages
-                  </Box>
-                </Box>
-              </ListItem>
-            );
-          })}
-        </List>
+        <SessionList
+          sessions={sessions}
+          currentSessionId={currentSessionId}
+          onSessionChanged={async (id: number) => {
+            setCurrentSessionId(id);
+            await saveGlobalConfig(globalConfigKey_CurrentSessionId, id);
+          }}
+          onSessionClosed={(id: number) => {
+            if (currentSessionId === id) {
+              setCurrentSessionId(null);
+            }
+            setSessions(prev => {
+              deleteSession(id).catch(err => {
+                console.error(err);
+              });
+              const newSessions = new Map(prev);
+              newSessions.delete(id);
+              return newSessions;
+            });
+          }}
+        />
       </GridItem>
       <GridItem pl="2" area={'main'}>
         {currentSessionId && <ChatBox settings={settings} sessionId={currentSessionId} />}

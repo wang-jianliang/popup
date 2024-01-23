@@ -226,6 +226,29 @@ class ObjectStore<T> {
       };
     });
   }
+
+  // Delete the item in the object store
+  async deleteItem(id: number): Promise<void> {
+    console.log('delete item:', id);
+    if (!this.db) {
+      throw new Error('Database is not open');
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      const tx = this.db.transaction(this.storeName, 'readwrite');
+      const store = tx.objectStore(this.storeName);
+      const request = store.delete(id);
+
+      request.onsuccess = () => {
+        console.log('item deleted:', id);
+        resolve();
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  }
 }
 
 export default ObjectStore;
