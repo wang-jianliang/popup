@@ -175,7 +175,7 @@ class ObjectStore<T> {
   }
 
   // Load items from the object store, return the maxCount items at most
-  async loadItems(maxCount: number): Promise<Map<number, T>> {
+  async loadItems(maxCount: number): Promise<Map<number | string, T>> {
     if (!this.db) {
       throw new Error('Database is not open');
     }

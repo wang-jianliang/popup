@@ -1,10 +1,47 @@
 import { useEffect, useRef, useState } from 'react';
 import { fetchAgents } from '@src/agent/agentService';
 import Agent from '@src/agent/agent';
-import { Box, Card, CardBody, Divider, Heading, Stack, Text, Wrap, WrapItem } from '@chakra-ui/react';
+import { Box, Card, CardBody, Divider, Heading, Stack, Switch, Text, Wrap, WrapItem } from '@chakra-ui/react';
+import { getAgents } from '@pages/storage/agent';
+
+type AgentCardProps = {
+  agent: Agent;
+  initialEnabled?: boolean;
+  onEnabledChange?: (enabled: boolean) => void;
+};
+
+function AgentCard({ agent, initialEnabled, onEnabledChange }: AgentCardProps) {
+  const [enabled, setEnabled] = useState(initialEnabled || false);
+
+  useEffect(() => {
+    if (onEnabledChange) {
+      onEnabledChange(enabled);
+    }
+  }, [enabled, onEnabledChange]);
+
+  return (
+    <Card width="260px" height="130px" bg="gray.50">
+      <CardBody>
+        <Stack justifyContent="space-between" divider={<Divider borderColor="gray.200" />} spacing={1} height="100%">
+          <Box height="70%">
+            <Heading size="sm">{agent.name}</Heading>
+            <Text fontSize="12px">{agent.description}</Text>
+          </Box>
+          <Box justifyContent="space-between" display="flex" alignItems="center">
+            <Text fontSize="10px" color="gray">
+              {agent.engine}({agent.model})
+            </Text>
+            <Switch isChecked={enabled} onChange={event => setEnabled(event.target.checked)} />
+          </Box>
+        </Stack>
+      </CardBody>
+    </Card>
+  );
+}
 
 export default function AgentsMarket() {
   const [agents, setAgents] = useState<Map<string, Agent>>(new Map());
+  const [enabledAgents, setEnabledAgents] = useState<Map<string, Agent>>(new Map());
   const [offset, setOffset] = useState(0);
   const limit = 20;
 
@@ -15,14 +52,50 @@ export default function AgentsMarket() {
     offsetRef.current = offset;
   }, [offset]);
 
+  const updateAgent = (enabled: boolean, id: string, agent: Agent) => {
+    if (enabled) {
+      setAgents(prev => {
+        const newAgents = new Map(prev);
+        newAgents.delete(id);
+        return newAgents;
+      });
+      setEnabledAgents(prev => {
+        const newAgents = new Map(prev);
+        newAgents.set(id, agent);
+        return newAgents;
+      });
+    } else {
+      setEnabledAgents(prev => {
+        const newAgents = new Map(prev);
+        newAgents.delete(id);
+        return newAgents;
+      });
+      setAgents(prev => {
+        const newAgents = new Map(prev);
+        newAgents.set(id, agent);
+        return newAgents;
+      });
+    }
+  };
+
   const loadAgents = () => {
+    getAgents(1000).then(agents => {
+      setEnabledAgents(prev => {
+        const newAgents = new Map(prev);
+        agents.forEach((agent, id) => {
+          newAgents.set(id, agent);
+        });
+        return agents;
+      });
+    });
+
     console.log('load agents', offset, limit);
     fetchAgents(offsetRef.current, limit).then(agents => {
       // Append new agents to the existing ones
       setAgents(prev => {
         const newAgents = new Map(prev);
-        agents.forEach((agent, name) => {
-          newAgents.set(name, agent);
+        agents.forEach((agent, id) => {
+          newAgents.set(id, agent);
         });
         return newAgents;
       });
@@ -32,7 +105,7 @@ export default function AgentsMarket() {
 
   useEffect(() => {
     loadAgents();
-  }, [loadAgents]);
+  }, []);
 
   useEffect(() => {
     const target = loadMoreRef.current;
@@ -53,25 +126,36 @@ export default function AgentsMarket() {
     }
   }, []);
 
+  console.log('enabled agents', enabledAgents);
+  console.log('agents', agents);
+
   return (
     <Box>
       <Wrap spacing={3} maxH="700px" overflow="auto">
-        {Array.from(agents.values()).map(agent => {
+        {Array.from(enabledAgents.keys()).map(id => {
           return (
-            <WrapItem key={agent.name}>
-              <Card width="260px" height="130px" bg="gray.50">
-                <CardBody>
-                  <Stack justifyContent="space-between" divider={<Divider />} spacing={1} height="100%">
-                    <Box height="70%">
-                      <Heading size="sm">{agent.name}</Heading>
-                      <Text fontSize="12px">{agent.description}</Text>
-                    </Box>
-                    <Text fontSize="10px" color="gray">
-                      {agent.engine}({agent.model})
-                    </Text>
-                  </Stack>
-                </CardBody>
-              </Card>
+            <WrapItem key={id}>
+              <AgentCard
+                initialEnabled={true}
+                agent={enabledAgents.get(id)}
+                onEnabledChange={enabled => {
+                  updateAgent(enabled, id, enabledAgents.get(id));
+                }}
+              />
+            </WrapItem>
+          );
+        })}
+        <Divider marginY={2} w="90%" borderColor="gray" />
+        {Array.from(agents.keys()).map(id => {
+          return (
+            <WrapItem key={id}>
+              <AgentCard
+                initialEnabled={false}
+                agent={agents.get(id)}
+                onEnabledChange={enabled => {
+                  updateAgent(enabled, id, agents.get(id));
+                }}
+              />
             </WrapItem>
           );
         })}

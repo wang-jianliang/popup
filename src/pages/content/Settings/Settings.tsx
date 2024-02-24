@@ -14,7 +14,7 @@ export default function Settings(props: Props = { onClosed: null }) {
         <CloseButton onClick={props.onClosed} />
       </Flex>
       <Box padding={1}>
-        <Tabs variant="enclosed">
+        <Tabs variant="enclosed" isLazy={true}>
           <TabList>
             <Tab>Base</Tab>
             <Tab>Agents</Tab>

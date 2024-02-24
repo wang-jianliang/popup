@@ -55,13 +55,13 @@ export default function BaseSettings() {
       <form onSubmit={formik.handleSubmit}>
         <VStack>
           <FormControl id="apiKey" isInvalid={!!formik.errors.apiKey && formik.touched.apiKey}>
-            <FormLabel>API Key</FormLabel>
+            <FormLabel>Access code</FormLabel>
             <Input
               {...formik.getFieldProps('apiKey')}
               onBlur={e => {
                 formik.handleBlur(e);
               }}
-              placeholder="Please input your API key"
+              placeholder="Please input your access code"
             />
             <FormErrorMessage>{formik.errors.apiKey}</FormErrorMessage>
           </FormControl>
