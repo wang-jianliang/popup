@@ -1,6 +1,6 @@
 import Agent from '@src/agent/agent';
 import * as AgentWhatIs from '@src/agent/what_is.json';
-import * as AgentChat from '@src/agent/chat.json';
+import * as AgentChat from '@src/agent/chat-with-the-bot.json';
 import * as AgentTranslate from '@src/agent/translate.json';
 import * as AgentSummarize from '@src/agent/summarize.json';
 import * as AgentContextualSearch from '@src/agent/contextual_search.json';
