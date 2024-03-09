@@ -93,7 +93,11 @@ export default function App(props: Props) {
             aria-label="Open settings"
             icon={<SettingsIcon />}
             marginLeft={2}
-            onClick={() => setShowSettings(true)}
+            onClick={() => {
+              // Clear messages before showing settings
+              setMessages([]);
+              setShowSettings(true);
+            }}
           />
           <Spacer />
           <CloseButton p={2} size="md" onClick={onClose} />

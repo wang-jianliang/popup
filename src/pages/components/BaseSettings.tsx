@@ -43,7 +43,7 @@ export default function BaseSettings() {
   useEffect(() => {
     getGlobalConfig(globalConfigKey_EngineSettings).then((settings: EngineSettings) => {
       setSettings(settings);
-      formik.setFieldValue('apiKey', settings.apiKey);
+      formik.setFieldValue('apiKey', settings?.apiKey);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
