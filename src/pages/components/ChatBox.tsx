@@ -175,7 +175,10 @@ function ChatBox(
   };
 
   const onRetry = () => {
-    sendChat(messagesState.messages).catch(err => alert(err));
+    sendChat(messagesState.messages).catch(err => {
+      alert(err);
+      throw err;
+    });
   };
 
   const handleInputKeyDown = (event: KeyboardEvent) => {

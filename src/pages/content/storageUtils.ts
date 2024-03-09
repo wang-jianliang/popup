@@ -36,3 +36,11 @@ export const getSession = async (sessionId: number): Promise<ChatSession> => {
 export const getSessions = async (maxCount: number): Promise<Map<number, ChatSession>> => {
   return browser.runtime.sendMessage({ command: 'getSessions', data: maxCount });
 };
+
+export const saveGlobalConfig = async (key: string, value: any) => {
+  return browser.runtime.sendMessage({ command: 'saveGlobalConfig', data: { key, value } });
+};
+
+export const getGlobalConfig = async (key: string): Promise<any> => {
+  return browser.runtime.sendMessage({ command: 'getGlobalConfig', data: { key } });
+};

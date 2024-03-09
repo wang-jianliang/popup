@@ -50,10 +50,10 @@ export class ChatGPT implements Engine {
       Accept: 'application/json',
       Authorization: `Bearer ${APIKey}`,
     };
-    // this.client = new ApiClient({
-    //   baseURL: `${apiBaseURL}/api/openai/v1`,
-    //   headers: this.headers,
-    // });
+    this.client = new ApiClient({
+      baseURL: `${apiBaseURL}/api/openai/v1`,
+      headers: this.headers,
+    });
 
     console.log('ChatGPT engine initialized');
   }

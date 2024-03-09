@@ -13,6 +13,7 @@ import {
 import { getSessions } from '@pages/content/storageUtils';
 import OnClickData = Menus.OnClickData;
 import { fetchAgents } from '@src/agent/agentService';
+import { getGlobalConfig, saveGlobalConfig } from '@pages/storage/global';
 
 reloadOnUpdate('pages/background');
 
@@ -69,6 +70,10 @@ browser.runtime.onMessage.addListener(async (message: { command: string; data: a
       return await getSession(message.data);
     case 'fetchAgents':
       return await fetchAgents(message.data.offset, message.data.pageSize);
+    case 'saveGlobalConfig':
+      return await saveGlobalConfig(message.data.key, message.data.value);
+    case 'getGlobalConfig':
+      return await getGlobalConfig(message.data.key);
     default:
       console.log('unknown command:', command);
       return null;

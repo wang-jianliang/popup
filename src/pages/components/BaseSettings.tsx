@@ -3,16 +3,17 @@
 
 import { useFormik } from 'formik';
 import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, VStack } from '@chakra-ui/react';
-import { browser } from 'webextension-polyfill-ts';
-import { useEffect } from 'react';
-import { storageSyncKey_Settings } from '@src/constants';
+import { useEffect, useState } from 'react';
+import { globalConfigKey_EngineSettings } from '@src/constants';
 import EngineSettings from '@src/engines/engineSettings';
+import { getGlobalConfig, saveGlobalConfig } from '@pages/content/storageUtils';
 
 interface FormValues {
   apiKey: string;
 }
 
 export default function BaseSettings() {
+  const [settings, setSettings] = useState<EngineSettings | null>(null);
   const validate = (values: FormValues) => {
     const errors: Partial<FormValues> = {};
     const apiKey = values.apiKey;
@@ -27,10 +28,7 @@ export default function BaseSettings() {
   const formik = useFormik({
     initialValues: { apiKey: null },
     onSubmit: async (values, actions) => {
-      await browser.storage.sync
-        .set({
-          settings: { apiKey: values.apiKey },
-        })
+      await saveGlobalConfig(globalConfigKey_EngineSettings, { ...settings, apiKey: values.apiKey })
         .then(() => {
           actions.setSubmitting(false);
           console.log('settings saved', values);
@@ -43,9 +41,9 @@ export default function BaseSettings() {
   });
 
   useEffect(() => {
-    browser.storage.sync.get([storageSyncKey_Settings]).then((result: EngineSettings) => {
-      console.log('load settings form storage', result);
-      formik.setFieldValue('apiKey', result.apiKey);
+    getGlobalConfig(globalConfigKey_EngineSettings).then((settings: EngineSettings) => {
+      setSettings(settings);
+      formik.setFieldValue('apiKey', settings.apiKey);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

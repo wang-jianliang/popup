@@ -7,7 +7,7 @@ export const saveGlobalConfig = async (key: string, value: any) => {
   await configStore.saveItemWithKey(value, key);
 };
 
-export const loadGlobalConfig = async (key: string): Promise<any> => {
+export const getGlobalConfig = async (key: string): Promise<any> => {
   const configStore: ObjectStore<any> = await new ObjectStore<any>('global').open();
   return await configStore.loadItem(key);
 };

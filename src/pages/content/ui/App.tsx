@@ -11,11 +11,11 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import { storageSyncKey_Settings } from '@src/constants';
-import { browser, Menus } from 'webextension-polyfill-ts';
+import { globalConfigKey_EngineSettings } from '@src/constants';
+import { Menus } from 'webextension-polyfill-ts';
 import Agent from '@src/agent/agent';
 import { SettingsIcon } from '@chakra-ui/icons';
-import { createNewSession } from '@pages/content/storageUtils';
+import { createNewSession, getGlobalConfig } from '@pages/content/storageUtils';
 import EngineSettings from '@src/engines/engineSettings';
 import Settings from '@pages/content/Settings/Settings';
 import OnClickData = Menus.OnClickData;
@@ -69,8 +69,12 @@ export default function App(props: Props) {
   const color = useColorModeValue('gray.700', 'white');
 
   const loadSettings = () => {
-    browser.storage.sync.get([storageSyncKey_Settings]).then(result => {
-      const settings: EngineSettings = result[storageSyncKey_Settings];
+    getGlobalConfig(globalConfigKey_EngineSettings).then((settings: EngineSettings) => {
+      console.log('load settings', settings);
+      if (!settings) {
+        setShowSettings(true);
+        return;
+      }
       setSettings(settings);
       setShowSettings(false);
     });
@@ -79,12 +83,6 @@ export default function App(props: Props) {
   useEffect(() => {
     loadSettings();
   }, []);
-
-  useEffect(() => {
-    if (!settings) {
-      setShowSettings(true);
-    }
-  }, [settings]);
 
   return (
     <Card bg={bgColor} color={color} lineHeight={5} maxW="100%" maxWidth="600px" zIndex={10000}>

@@ -6,10 +6,9 @@ import { Box, Button, Center, Divider, Grid, GridItem, Text } from '@chakra-ui/r
 import { ChatSession, deleteSession, getSessions } from '@pages/storage/chat';
 import ChatBox from '@pages/components/ChatBox';
 import EngineSettings from '@src/engines/engineSettings';
-import { browser } from 'webextension-polyfill-ts';
-import { storageSyncKey_Settings } from '@src/constants';
-import { globalConfigKey_CurrentSessionId, loadGlobalConfig, saveGlobalConfig } from '@pages/storage/global';
+import { globalConfigKey_CurrentSessionId, getGlobalConfig, saveGlobalConfig } from '@pages/storage/global';
 import { SessionList } from '@pages/sidepanel/SessionList';
+import { globalConfigKey_EngineSettings } from '@src/constants';
 
 const SidePanel = () => {
   const [sessions, setSessions] = useState<Map<number, ChatSession>>(new Map<number, ChatSession>());
@@ -17,8 +16,7 @@ const SidePanel = () => {
   const [settings, setSettings] = useState<EngineSettings | null>(null);
 
   useEffect(() => {
-    browser.storage.sync.get([storageSyncKey_Settings]).then(result => {
-      const settings: EngineSettings = result[storageSyncKey_Settings];
+    getGlobalConfig(globalConfigKey_EngineSettings).then((settings: EngineSettings) => {
       setSettings(settings);
     });
   }, []);
@@ -28,7 +26,7 @@ const SidePanel = () => {
       console.log('sessions', sessions);
       if (sessions.size > 0) {
         setSessions(sessions);
-        loadGlobalConfig(globalConfigKey_CurrentSessionId).then(id => {
+        getGlobalConfig(globalConfigKey_CurrentSessionId).then(id => {
           setCurrentSessionId(id || sessions.keys().next().value);
         });
       }
