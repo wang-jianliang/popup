@@ -18,7 +18,7 @@ export default function BaseSettings() {
     const apiKey = values.apiKey;
     if (!apiKey) {
       errors.apiKey = 'A valid API key is required';
-    } else if (!apiKey.startsWith('sk-')) {
+    } else if (!apiKey.startsWith('sk-') && !apiKey.startsWith('nk-')) {
       errors.apiKey = 'Your API key is invalid';
     }
     return errors;

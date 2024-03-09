@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { fetchAgents } from '@src/agent/agentService';
+import { fetchAgents } from '@src/shared/backgroundActions';
 import Agent from '@src/agent/agent';
 import { Box, Card, CardBody, Divider, Heading, Stack, Switch, Text, Wrap, WrapItem } from '@chakra-ui/react';
-import { getAgents } from '@pages/storage/agent';
 
 type AgentCardProps = {
   agent: Agent;
@@ -29,7 +28,7 @@ function AgentCard({ agent, initialEnabled, onEnabledChange }: AgentCardProps) {
           </Box>
           <Box justifyContent="space-between" display="flex" alignItems="center">
             <Text fontSize="10px" color="gray">
-              {agent.engine}({agent.model})
+              {agent.engine}({agent.models[0]})
             </Text>
             <Switch isChecked={enabled} onChange={event => setEnabled(event.target.checked)} />
           </Box>
@@ -79,23 +78,24 @@ export default function AgentsMarket() {
   };
 
   const loadAgents = () => {
-    getAgents(1000).then(agents => {
-      setEnabledAgents(prev => {
-        const newAgents = new Map(prev);
-        agents.forEach((agent, id) => {
-          newAgents.set(id, agent);
-        });
-        return agents;
-      });
-    });
+    // getAgents(1000).then(agents => {
+    //   setEnabledAgents(prev => {
+    //     const newAgents = new Map(prev);
+    //     agents.forEach((agent, id) => {
+    //       newAgents.set(id, agent);
+    //     });
+    //     return agents;
+    //   });
+    // });
 
-    console.log('load agents', offset, limit);
+    console.log('fetch agents', offset, limit);
     fetchAgents(offsetRef.current, limit).then(agents => {
+      console.log('fetched agents', agents);
       // Append new agents to the existing ones
       setAgents(prev => {
         const newAgents = new Map(prev);
-        agents.forEach((agent, id) => {
-          newAgents.set(id, agent);
+        agents.forEach(agent => {
+          newAgents.set(agent.identifier, agent);
         });
         return newAgents;
       });

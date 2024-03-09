@@ -1,6 +1,7 @@
 import { ChatCompletionChunk, Engine } from '@src/engines/engine';
 import ApiClient from '@pages/common/apiClient';
 import { ChatMessage } from '@pages/content/ui/types';
+import { apiBaseURL } from '@src/constants';
 
 interface Model {
   id: string;
@@ -42,7 +43,7 @@ export class ChatGPT implements Engine {
 
   public constructor(APIKey: string) {
     this.client = new ApiClient({
-      baseURL: 'https://api.openai.com/v1',
+      baseURL: `${apiBaseURL}/api/openai/v1`,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',

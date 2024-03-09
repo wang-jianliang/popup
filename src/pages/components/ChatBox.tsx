@@ -116,7 +116,7 @@ function ChatBox(
     const engine = getEngine(session.agent.engine, settings);
 
     await engine.complete(
-      session.agent.model,
+      session.agent.models[0],
       systemPrompt ? [{ role: 'system', content: systemPrompt }, ...newMessages] : newMessages,
       (text: string) => {
         setIncomingMessage((prev: string) => prev + text);
@@ -137,6 +137,7 @@ function ChatBox(
       },
       err => {
         setGenerating(false);
+        console.error('completion error:', err);
         alert(err);
       },
     );

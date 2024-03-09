@@ -12,6 +12,7 @@ import {
 } from '@pages/storage/chat';
 import { getSessions } from '@pages/content/storageUtils';
 import OnClickData = Menus.OnClickData;
+import { fetchAgents } from '@src/agent/agentService';
 
 reloadOnUpdate('pages/background');
 
@@ -66,6 +67,8 @@ browser.runtime.onMessage.addListener(async (message: { command: string; data: a
       return await getSessions(message.data);
     case 'getSession':
       return await getSession(message.data);
+    case 'fetchAgents':
+      return await fetchAgents(message.data.offset, message.data.pageSize);
     default:
       console.log('unknown command:', command);
       return null;
