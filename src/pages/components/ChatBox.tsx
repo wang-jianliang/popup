@@ -137,8 +137,8 @@ function ChatBox(
       },
       err => {
         setGenerating(false);
-        console.error('completion error:', err);
         alert(err);
+        throw err;
       },
     );
   };
@@ -157,7 +157,10 @@ function ChatBox(
       setMessagesState(prevState => {
         const newMessages = [...prevState.messages, ...messages];
         if (messages[messages.length - 1].role === 'user') {
-          sendChat(newMessages).catch(err => alert(err));
+          sendChat(newMessages).catch(err => {
+            alert(err);
+            throw err;
+          });
         }
         return {
           messages: newMessages,

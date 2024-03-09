@@ -31,6 +31,7 @@
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.1",
     "@fengkx/react-syntax-highlighter": "^15.6.1",
+    "@fortaine/fetch-event-source": "^3.0.6",
     "autosize": "^6.0.1",
     "axios": "^1.6.2",
     "chakra-ui-markdown-renderer": "^4.1.0",

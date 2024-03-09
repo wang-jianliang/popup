@@ -23,6 +23,9 @@ dependencies:
   '@fengkx/react-syntax-highlighter':
     specifier: ^15.6.1
     version: 15.6.1(react@18.2.0)
+  '@fortaine/fetch-event-source':
+    specifier: ^3.0.6
+    version: 3.0.6
   autosize:
     specifier: ^6.0.1
     version: 6.0.1
@@ -2062,6 +2065,11 @@ packages:
       prismjs: 1.29.0
       react: 18.2.0
       refractor: 4.8.1
+    dev: false
+
+  /@fortaine/fetch-event-source@3.0.6:
+    resolution: {integrity: sha512-621GAuLMvKtyZQ3IA6nlDWhV1V/7PGOTNIGLUifxt0KzM+dZIweJ6F3XvQF3QnqeNfS1N7WQ0Kil1Di/lhChEw==}
+    engines: {node: '>=16.15'}
     dev: false
 
   /@humanwhocodes/config-array@0.11.13:
