@@ -14,6 +14,8 @@ interface FormValues {
 
 export default function BaseSettings() {
   const [settings, setSettings] = useState<EngineSettings | null>(null);
+  const [saved, setSaved] = useState(false);
+
   const validate = (values: FormValues) => {
     const errors: Partial<FormValues> = {};
     const apiKey = values.apiKey;
@@ -28,9 +30,11 @@ export default function BaseSettings() {
   const formik = useFormik({
     initialValues: { apiKey: null },
     onSubmit: async (values, actions) => {
+      actions.setSubmitting(true);
       await saveGlobalConfig(globalConfigKey_EngineSettings, { ...settings, apiKey: values.apiKey })
         .then(() => {
           actions.setSubmitting(false);
+          setSaved(true);
           console.log('settings saved', values);
         })
         .catch(err => {
@@ -57,6 +61,7 @@ export default function BaseSettings() {
             <Input
               {...formik.getFieldProps('apiKey')}
               onBlur={e => {
+                setSaved(false);
                 formik.handleBlur(e);
               }}
               placeholder="Please input your access code"
@@ -64,7 +69,7 @@ export default function BaseSettings() {
             <FormErrorMessage>{formik.errors.apiKey}</FormErrorMessage>
           </FormControl>
         </VStack>
-        <Button mt={4} colorScheme="teal" isLoading={formik.isSubmitting} type="submit">
+        <Button mt={4} colorScheme="blue" isLoading={formik.isSubmitting} isDisabled={saved} type="submit">
           Save
         </Button>
       </form>
