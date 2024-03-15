@@ -4,9 +4,11 @@
 import { useFormik } from 'formik';
 import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, VStack } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { globalConfigKey_EngineSettings } from '@src/constants';
+import { globalConfigKey_ActivationData, globalConfigKey_EngineSettings } from '@src/constants';
 import EngineSettings from '@src/engines/engineSettings';
 import { getGlobalConfig, saveGlobalConfig } from '@pages/content/storageUtils';
+import { type ActivateLicense, activateLicense } from '@lemonsqueezy/lemonsqueezy.js';
+import { getDeviceId } from '@src/utils';
 
 interface FormValues {
   apiKey: string;
@@ -21,7 +23,7 @@ export default function BaseSettings() {
     const apiKey = values.apiKey;
     if (!apiKey) {
       errors.apiKey = 'A valid API key is required';
-    } else if (!apiKey.startsWith('sk-') && !apiKey.startsWith('nk-')) {
+    } else if (!apiKey.startsWith('sk-') && !apiKey.startsWith('nk-') && !apiKey.startsWith('ak-')) {
       errors.apiKey = 'Your API key is invalid';
     }
     return errors;
@@ -31,6 +33,31 @@ export default function BaseSettings() {
     initialValues: { apiKey: null },
     onSubmit: async (values, actions) => {
       actions.setSubmitting(true);
+      // Check the saved API key, if there's no change, don't do anything
+      if (settings?.apiKey === values.apiKey) {
+        actions.setSubmitting(false);
+        return;
+      }
+
+      // If the API key starts with "ak-", perform an activation
+      if (values.apiKey.startsWith('ak-')) {
+        // Perform activation
+        const licenseKey = values.apiKey.slice(3);
+        const instanceName = getDeviceId();
+        const { statusCode, error, data } = await activateLicense(licenseKey, instanceName);
+        if (statusCode !== 200) {
+          actions.setSubmitting(false);
+          alert(`Failed to activate license: ${error}`);
+          return;
+        }
+
+        // Save the activation data
+        const activationData: ActivateLicense = data;
+        await saveGlobalConfig(globalConfigKey_ActivationData, activationData);
+
+        console.log('activation');
+      }
+
       await saveGlobalConfig(globalConfigKey_EngineSettings, { ...settings, apiKey: values.apiKey })
         .then(() => {
           actions.setSubmitting(false);

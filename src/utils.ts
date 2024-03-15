@@ -15,3 +15,13 @@ export const getClientX = (event: UserEventType) => {
 export const getClientY = (event: UserEventType) => {
   return event instanceof MouseEvent ? event.clientY : event.changedTouches[0].clientY;
 };
+
+export const getDeviceId = () => {
+  const userAgent = navigator.userAgent;
+  const language = navigator.language;
+
+  let deviceId = userAgent + language;
+  deviceId = btoa(deviceId); // 使用 base64 编码
+
+  return deviceId;
+};
