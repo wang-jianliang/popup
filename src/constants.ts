@@ -7,6 +7,10 @@ export const storageSyncKey_Agents = 'agents';
 export const globalConfigKey_EngineSettings = 'engine_settings';
 export const globalConfigKey_ActivationData = 'activation_data';
 
+export const ACCESS_CODE_PREFIX = 'nk-';
+export const LICENSE_KEY_PREFIX = 'ak-';
+export const API_KEY_PREFIX = 'sk-';
+
 export const defaultModel = 'gpt-3.5-turbo';
 
 // datastore

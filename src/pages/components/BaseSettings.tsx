@@ -4,7 +4,13 @@
 import { useFormik } from 'formik';
 import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, VStack } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { globalConfigKey_ActivationData, globalConfigKey_EngineSettings } from '@src/constants';
+import {
+  ACCESS_CODE_PREFIX,
+  LICENSE_KEY_PREFIX,
+  API_KEY_PREFIX,
+  globalConfigKey_ActivationData,
+  globalConfigKey_EngineSettings,
+} from '@src/constants';
 import EngineSettings from '@src/engines/engineSettings';
 import { getGlobalConfig, saveGlobalConfig } from '@pages/content/storageUtils';
 import { type ActivateLicense, activateLicense } from '@lemonsqueezy/lemonsqueezy.js';
@@ -22,9 +28,13 @@ export default function BaseSettings() {
     const errors: Partial<FormValues> = {};
     const apiKey = values.apiKey;
     if (!apiKey) {
-      errors.apiKey = 'A valid API key is required';
-    } else if (!apiKey.startsWith('sk-') && !apiKey.startsWith('nk-') && !apiKey.startsWith('ak-')) {
-      errors.apiKey = 'Your API key is invalid';
+      errors.apiKey = 'A valid license key is required';
+    } else if (
+      !apiKey.startsWith(API_KEY_PREFIX) &&
+      !apiKey.startsWith(ACCESS_CODE_PREFIX) &&
+      !apiKey.startsWith(LICENSE_KEY_PREFIX)
+    ) {
+      errors.apiKey = 'Your license is invalid';
     }
     return errors;
   };
@@ -36,6 +46,7 @@ export default function BaseSettings() {
       // Check the saved API key, if there's no change, don't do anything
       if (settings?.apiKey === values.apiKey) {
         actions.setSubmitting(false);
+        setSaved(true);
         return;
       }
 
@@ -53,6 +64,11 @@ export default function BaseSettings() {
 
         // Save the activation data
         const activationData: ActivateLicense = data;
+        if (!activationData.activated) {
+          actions.setSubmitting(false);
+          alert(`Failed to activate license: ${error}`);
+          return;
+        }
         await saveGlobalConfig(globalConfigKey_ActivationData, activationData);
 
         console.log('activation');

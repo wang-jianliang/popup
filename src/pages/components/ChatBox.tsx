@@ -20,11 +20,13 @@ import { Clear, Send } from '@pages/content/ui/Icons';
 import { ChatMessage } from '@pages/content/ui/types';
 import autosize from 'autosize';
 import MarkdownSyntaxHighlight from '@pages/components/Markdown';
-import { getMessages, getSession, storeNewMessages } from '@pages/content/storageUtils';
+import { getGlobalConfig, getMessages, getSession, storeNewMessages } from '@pages/content/storageUtils';
 import { getEngine } from '@src/engines/engineManager';
 import EngineSettings from '@src/engines/engineSettings';
 import { RepeatIcon } from '@chakra-ui/icons';
 import { ChatSession } from '@pages/storage/chat';
+import { LICENSE_KEY_PREFIX, globalConfigKey_ActivationData } from '@src/constants';
+import { type ActivateLicense } from '@lemonsqueezy/lemonsqueezy.js';
 
 type Props = {
   settings: EngineSettings | null;
@@ -112,8 +114,15 @@ function ChatBox(
       }
     }
 
-    // override model in settings
-    const engine = getEngine(session.agent.engine, settings);
+    // override apiKey in settings if it's a license key
+    let newSettings = settings;
+    if (settings?.apiKey.startsWith(LICENSE_KEY_PREFIX)) {
+      await getGlobalConfig(globalConfigKey_ActivationData).then((activationData: ActivateLicense) => {
+        newSettings = { ...settings, apiKey: `${settings.apiKey}.${activationData.instance.id}` };
+      });
+    }
+
+    const engine = getEngine(session.agent.engine, newSettings);
 
     await engine.complete(
       session.agent.models[0],
