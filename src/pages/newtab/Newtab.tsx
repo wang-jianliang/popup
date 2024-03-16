@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '@assets/img/logo.svg';
+import logo from '@assets/img/logo.png';
 import '@pages/newtab/Newtab.css';
 import '@pages/newtab/Newtab.scss';
 import useStorage from '@src/shared/hooks/useStorage';
