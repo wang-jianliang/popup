@@ -11,7 +11,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import { globalConfigKey_EngineSettings } from '@src/constants';
+import { GLOBAL_CONFIG_KEY_ENGINE_SETTINGS } from '@src/constants';
 import { Menus } from 'webextension-polyfill-ts';
 import Agent from '@src/agent/agent';
 import { SettingsIcon } from '@chakra-ui/icons';
@@ -69,7 +69,7 @@ export default function App(props: Props) {
   const color = useColorModeValue('gray.700', 'white');
 
   const loadSettings = () => {
-    getGlobalConfig(globalConfigKey_EngineSettings).then((settings: EngineSettings) => {
+    getGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS).then((settings: EngineSettings) => {
       console.log('load settings', settings);
       if (!settings) {
         setShowSettings(true);

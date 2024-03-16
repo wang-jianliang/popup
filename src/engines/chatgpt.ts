@@ -1,7 +1,7 @@
 import { Engine } from '@src/engines/engine';
 import ApiClient from '@pages/common/apiClient';
 import { ChatMessage } from '@pages/content/ui/types';
-import { apiBaseURL } from '@src/constants';
+import { API_BASE_URL } from '@src/constants';
 import { EventStreamContentType, fetchEventSource } from '@fortaine/fetch-event-source';
 import { prettyObject } from '@root/utils/format';
 
@@ -51,7 +51,7 @@ export class ChatGPT implements Engine {
       Authorization: `Bearer ${APIKey}`,
     };
     this.client = new ApiClient({
-      baseURL: `${apiBaseURL}/api/openai/v1`,
+      baseURL: `${API_BASE_URL}/api/openai/v1`,
       headers: this.headers,
     });
 
@@ -105,7 +105,7 @@ export class ChatGPT implements Engine {
       headers: this.headers,
     };
 
-    const chatPath = `${apiBaseURL}/api/openai/v1/chat/completions`;
+    const chatPath = `${API_BASE_URL}/api/openai/v1/chat/completions`;
     let finished = false;
 
     const finish = () => {

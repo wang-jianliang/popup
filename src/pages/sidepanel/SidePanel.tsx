@@ -8,7 +8,7 @@ import ChatBox from '@pages/components/ChatBox';
 import EngineSettings from '@src/engines/engineSettings';
 import { globalConfigKey_CurrentSessionId, getGlobalConfig, saveGlobalConfig } from '@pages/storage/global';
 import { SessionList } from '@pages/sidepanel/SessionList';
-import { globalConfigKey_EngineSettings } from '@src/constants';
+import { GLOBAL_CONFIG_KEY_ENGINE_SETTINGS } from '@src/constants';
 
 const SidePanel = () => {
   const [sessions, setSessions] = useState<Map<number, ChatSession>>(new Map<number, ChatSession>());
@@ -16,7 +16,7 @@ const SidePanel = () => {
   const [settings, setSettings] = useState<EngineSettings | null>(null);
 
   useEffect(() => {
-    getGlobalConfig(globalConfigKey_EngineSettings).then((settings: EngineSettings) => {
+    getGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS).then((settings: EngineSettings) => {
       setSettings(settings);
     });
   }, []);

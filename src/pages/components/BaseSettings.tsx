@@ -8,8 +8,8 @@ import {
   ACCESS_CODE_PREFIX,
   LICENSE_KEY_PREFIX,
   API_KEY_PREFIX,
-  globalConfigKey_ActivationData,
-  globalConfigKey_EngineSettings,
+  GLOBAL_CONFIG_KEY_ACTIVATION_DATA,
+  GLOBAL_CONFIG_KEY_ENGINE_SETTINGS,
 } from '@src/constants';
 import EngineSettings from '@src/engines/engineSettings';
 import { getGlobalConfig, saveGlobalConfig } from '@pages/content/storageUtils';
@@ -69,12 +69,12 @@ export default function BaseSettings() {
           alert(`Failed to activate license: ${error}`);
           return;
         }
-        await saveGlobalConfig(globalConfigKey_ActivationData, activationData);
+        await saveGlobalConfig(GLOBAL_CONFIG_KEY_ACTIVATION_DATA, activationData);
 
         console.log('activation');
       }
 
-      await saveGlobalConfig(globalConfigKey_EngineSettings, { ...settings, apiKey: values.apiKey })
+      await saveGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS, { ...settings, apiKey: values.apiKey })
         .then(() => {
           actions.setSubmitting(false);
           setSaved(true);
@@ -88,7 +88,7 @@ export default function BaseSettings() {
   });
 
   useEffect(() => {
-    getGlobalConfig(globalConfigKey_EngineSettings).then((settings: EngineSettings) => {
+    getGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS).then((settings: EngineSettings) => {
       setSettings(settings);
       formik.setFieldValue('apiKey', settings?.apiKey);
     });

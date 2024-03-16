@@ -1,4 +1,4 @@
-import { databaseName } from '@src/constants';
+import { DATABASE_NAME } from '@src/constants';
 
 const storeNames = ['message', 'session', 'global'];
 
@@ -21,9 +21,9 @@ class ObjectStore<T> {
         resolve(this);
         return;
       }
-      console.log(`try open db ${databaseName}`);
+      console.log(`try open db ${DATABASE_NAME}`);
 
-      const request = indexedDB.open(databaseName, 1);
+      const request = indexedDB.open(DATABASE_NAME, 1);
 
       request.onsuccess = e => {
         console.log('onsuccess');

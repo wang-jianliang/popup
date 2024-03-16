@@ -25,7 +25,7 @@ import { getEngine } from '@src/engines/engineManager';
 import EngineSettings from '@src/engines/engineSettings';
 import { RepeatIcon } from '@chakra-ui/icons';
 import { ChatSession } from '@pages/storage/chat';
-import { LICENSE_KEY_PREFIX, globalConfigKey_ActivationData } from '@src/constants';
+import { LICENSE_KEY_PREFIX, GLOBAL_CONFIG_KEY_ACTIVATION_DATA } from '@src/constants';
 import { type ActivateLicense } from '@lemonsqueezy/lemonsqueezy.js';
 
 type Props = {
@@ -117,7 +117,7 @@ function ChatBox(
     // override apiKey in settings if it's a license key
     let newSettings = settings;
     if (settings?.apiKey.startsWith(LICENSE_KEY_PREFIX)) {
-      await getGlobalConfig(globalConfigKey_ActivationData).then((activationData: ActivateLicense) => {
+      await getGlobalConfig(GLOBAL_CONFIG_KEY_ACTIVATION_DATA).then((activationData: ActivateLicense) => {
         newSettings = { ...settings, apiKey: `${settings.apiKey}.${activationData.instance.id}` };
       });
     }

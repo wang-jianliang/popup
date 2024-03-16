@@ -5,7 +5,7 @@ import injectedStyle from './injected.css?inline';
 import { browser, Menus } from 'webextension-polyfill-ts';
 import { BrowserMessage, UserEventType } from '@root/src/types';
 import { getClientX, getClientY } from '@root/src/utils';
-import { contentContainerViewId, messageType_MenuClicked } from '@root/src/constants';
+import { contentContainerViewId, MESSAGE_TYPE_MENU_CLICKED } from '@root/src/constants';
 import EmotionCacheProvider from './EmotionCacheProvider';
 import CustomChakraProvider from './CustomChakraProvider';
 import { Box } from '@chakra-ui/react';
@@ -80,7 +80,7 @@ document.addEventListener('touchend', mouseUpHandler);
 const messagesFromContextMenu = async (msg: BrowserMessage) => {
   console.log('[content.js]. Message received', msg);
 
-  if (msg.type === messageType_MenuClicked) {
+  if (msg.type === MESSAGE_TYPE_MENU_CLICKED) {
     console.log(`menu ${msg} is clicked`);
     const root = document.createElement('div');
     document.body.appendChild(root);

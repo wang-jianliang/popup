@@ -1,4 +1,4 @@
-import { messageType_MenuClicked } from '@root/src/constants';
+import { MESSAGE_TYPE_MENU_CLICKED } from '@root/src/constants';
 import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
 import AgentsLoader from '@src/agent/agentsRegister';
 import { browser, Menus } from 'webextension-polyfill-ts';
@@ -45,7 +45,7 @@ browser.contextMenus?.onClicked.addListener(async function (info: OnClickData) {
   const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
   tab.id &&
     (await browser.tabs.sendMessage(tab.id, {
-      type: messageType_MenuClicked,
+      type: MESSAGE_TYPE_MENU_CLICKED,
       agent: agent,
       info: info,
     }));
