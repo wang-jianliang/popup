@@ -2,14 +2,24 @@
 // import { Field, Form, Formik } from 'formik';
 
 import { useFormik } from 'formik';
-import { Box, Button, FormControl, FormErrorMessage, FormLabel, Input, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Input,
+  InputGroup,
+  InputRightElement,
+  VStack,
+} from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import {
   ACCESS_CODE_PREFIX,
-  LICENSE_KEY_PREFIX,
   API_KEY_PREFIX,
   GLOBAL_CONFIG_KEY_ACTIVATION_DATA,
   GLOBAL_CONFIG_KEY_ENGINE_SETTINGS,
+  LICENSE_KEY_PREFIX,
 } from '@src/constants';
 import EngineSettings from '@src/engines/engineSettings';
 import { getGlobalConfig, saveGlobalConfig } from '@pages/content/storageUtils';
@@ -23,6 +33,7 @@ interface FormValues {
 export default function BaseSettings() {
   const [settings, setSettings] = useState<EngineSettings | null>(null);
   const [saved, setSaved] = useState(false);
+  const [showLicenseKey, setShowLicenseKey] = useState(false);
 
   const validate = (values: FormValues) => {
     const errors: Partial<FormValues> = {};
@@ -101,14 +112,22 @@ export default function BaseSettings() {
         <VStack>
           <FormControl id="apiKey" isInvalid={!!formik.errors.apiKey && formik.touched.apiKey}>
             <FormLabel>Access code</FormLabel>
-            <Input
-              {...formik.getFieldProps('apiKey')}
-              onBlur={e => {
-                setSaved(false);
-                formik.handleBlur(e);
-              }}
-              placeholder="Please input your access code"
-            />
+            <InputGroup>
+              <Input
+                {...formik.getFieldProps('apiKey')}
+                onBlur={e => {
+                  setSaved(false);
+                  formik.handleBlur(e);
+                }}
+                placeholder="Please input your license key"
+                type={showLicenseKey ? 'text' : 'password'}
+              />
+              <InputRightElement width="4.5rem">
+                <Button h="1.75rem" size="sm" onClick={() => setShowLicenseKey(!showLicenseKey)}>
+                  {showLicenseKey ? 'Hide' : 'Show'}
+                </Button>
+              </InputRightElement>
+            </InputGroup>
             <FormErrorMessage>{formik.errors.apiKey}</FormErrorMessage>
           </FormControl>
         </VStack>
