@@ -11,6 +11,7 @@ import {
   Input,
   InputGroup,
   InputRightElement,
+  Link,
   VStack,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
@@ -25,6 +26,7 @@ import EngineSettings from '@src/engines/engineSettings';
 import { getGlobalConfig, saveGlobalConfig } from '@pages/content/storageUtils';
 import { type ActivateLicense, activateLicense } from '@lemonsqueezy/lemonsqueezy.js';
 import { getDeviceId } from '@src/utils';
+import { ExternalLinkIcon } from '@chakra-ui/icons';
 
 interface FormValues {
   apiKey: string;
@@ -128,6 +130,9 @@ export default function BaseSettings() {
                 </Button>
               </InputRightElement>
             </InputGroup>
+            <Link color="blue.400" href="https://store.hellogeek.work/checkout" isExternal>
+              Get a license key <ExternalLinkIcon mx="2px" />
+            </Link>
             <FormErrorMessage>{formik.errors.apiKey}</FormErrorMessage>
           </FormControl>
         </VStack>
