@@ -131,7 +131,13 @@ export default function BaseSettings() {
             <FormErrorMessage>{formik.errors.apiKey}</FormErrorMessage>
           </FormControl>
         </VStack>
-        <Button mt={4} colorScheme="blue" isLoading={formik.isSubmitting} isDisabled={saved} type="submit">
+        <Button
+          marginTop={4}
+          size="md"
+          colorScheme="blue"
+          isLoading={formik.isSubmitting}
+          isDisabled={saved}
+          type="submit">
           Save
         </Button>
       </form>
