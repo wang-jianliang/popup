@@ -14,7 +14,7 @@ import React, { useEffect, useState } from 'react';
 import { GLOBAL_CONFIG_KEY_ENGINE_SETTINGS } from '@src/constants';
 import { Menus } from 'webextension-polyfill-ts';
 import Agent from '@src/agent/agent';
-import { SettingsIcon } from '@chakra-ui/icons';
+import { ArrowBackIcon, SettingsIcon } from '@chakra-ui/icons';
 import { createNewSession, getGlobalConfig } from '@pages/content/storageUtils';
 import EngineSettings from '@src/engines/engineSettings';
 import Settings from '@pages/content/Settings/Settings';
@@ -86,7 +86,7 @@ export default function App(props: Props) {
 
   return (
     <Card bg={bgColor} color={color} lineHeight={5} maxW="100%" maxWidth="600px" zIndex={10000}>
-      {!showSettings && (
+      {!showSettings ? (
         <Flex p={2}>
           {settings?.apiKey && <Button p={2}>{agent.name}</Button>}
           <IconButton
@@ -98,6 +98,18 @@ export default function App(props: Props) {
               setMessages([]);
               setShowSettings(true);
             }}
+          />
+          <Spacer />
+          <CloseButton p={2} size="md" onClick={onClose} />
+        </Flex>
+      ) : (
+        <Flex p={2}>
+          <div />
+          <IconButton
+            aria-label="Back"
+            variant="outline"
+            icon={<ArrowBackIcon />}
+            onClick={() => setShowSettings(false)}
           />
           <Spacer />
           <CloseButton p={2} size="md" onClick={onClose} />
