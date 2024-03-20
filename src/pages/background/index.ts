@@ -1,4 +1,4 @@
-import { MESSAGE_TYPE_MENU_CLICKED } from '@root/src/constants';
+import { MENU_ITEM_ID_OPEN_SIDE_PANEL, MESSAGE_TYPE_MENU_CLICKED } from '@root/src/constants';
 import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
 import AgentsLoader from '@src/agent/agentsRegister';
 import { browser, Menus } from 'webextension-polyfill-ts';
@@ -26,6 +26,15 @@ reloadOnUpdate('pages/content/style.scss');
 console.log('background loaded');
 
 const agentsRegistry = new AgentsLoader();
+
+if (chrome.sidePanel) {
+  browser.contextMenus.create({
+    id: MENU_ITEM_ID_OPEN_SIDE_PANEL,
+    title: '[Popup] Open Side Panel',
+    contexts: ['all'],
+  });
+}
+
 agentsRegistry.loadAgents().then(agents => {
   console.log('agents loaded', agents);
   agents.forEach((agent, id) => {
@@ -38,17 +47,23 @@ agentsRegistry.loadAgents().then(agents => {
   });
 });
 
-browser.contextMenus?.onClicked.addListener(async function (info: OnClickData) {
+browser.contextMenus?.onClicked.addListener(async function (info: OnClickData, tab) {
   const agent = agentsRegistry.getAgent(<string>info.menuItemId);
 
-  console.log('[background.js', 'contextMenus onClicked');
-  const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
-  tab.id &&
-    (await browser.tabs.sendMessage(tab.id, {
-      type: MESSAGE_TYPE_MENU_CLICKED,
-      agent: agent,
-      info: info,
-    }));
+  console.log('[background.js', 'contextMenus onClicked', info);
+  if (info.menuItemId === MENU_ITEM_ID_OPEN_SIDE_PANEL) {
+    // This will open the panel in all the pages on the current window.
+    // Only chrome supports this feature.
+    await chrome.sidePanel.open({ windowId: tab.windowId });
+    await browser.sidebarAction.open();
+  } else {
+    tab.id &&
+      (await browser.tabs.sendMessage(tab.id, {
+        type: MESSAGE_TYPE_MENU_CLICKED,
+        agent: agent,
+        info: info,
+      }));
+  }
 });
 
 browser.runtime.onMessage.addListener(async (message: { command: string; data: any }) => {

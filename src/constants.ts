@@ -1,6 +1,7 @@
 export const contentContainerViewId = 'popup-content-view-container';
 
 export const MESSAGE_TYPE_MENU_CLICKED = 'menu_clicked';
+export const MENU_ITEM_ID_OPEN_SIDE_PANEL = 'open_side_panel';
 
 export const STORAGE_KEY_AGENTS = 'agents';
 
