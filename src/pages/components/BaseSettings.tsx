@@ -32,6 +32,14 @@ interface FormValues {
   apiKey: string;
 }
 
+function isLicenseKey(key: string) {
+  const regex = /^[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}$/;
+  if (key.startsWith(LICENSE_KEY_PREFIX)) {
+    key = key.slice(3);
+  }
+  return regex.test(key);
+}
+
 export default function BaseSettings() {
   const [settings, setSettings] = useState<EngineSettings | null>(null);
   const [saved, setSaved] = useState(false);
@@ -45,7 +53,8 @@ export default function BaseSettings() {
     } else if (
       !apiKey.startsWith(API_KEY_PREFIX) &&
       !apiKey.startsWith(ACCESS_CODE_PREFIX) &&
-      !apiKey.startsWith(LICENSE_KEY_PREFIX)
+      !apiKey.startsWith(LICENSE_KEY_PREFIX) &&
+      !isLicenseKey(apiKey)
     ) {
       errors.apiKey = 'Your license is invalid';
     }
@@ -63,8 +72,9 @@ export default function BaseSettings() {
         return;
       }
 
+      let apiKey = values.apiKey;
       // If the API key starts with "ak-", perform an activation
-      if (values.apiKey.startsWith('ak-')) {
+      if (isLicenseKey(apiKey)) {
         // Perform activation
         const licenseKey = values.apiKey.slice(3);
         const instanceName = getDeviceId();
@@ -83,11 +93,13 @@ export default function BaseSettings() {
           return;
         }
         await saveGlobalConfig(GLOBAL_CONFIG_KEY_ACTIVATION_DATA, activationData);
-
-        console.log('activation');
+        if (!apiKey.startsWith(API_KEY_PREFIX)) {
+          apiKey = `${API_KEY_PREFIX}${apiKey}`;
+        }
+        console.log('new activation');
       }
 
-      await saveGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS, { ...settings, apiKey: values.apiKey })
+      await saveGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS, { ...settings, apiKey: apiKey })
         .then(() => {
           actions.setSubmitting(false);
           setSaved(true);
