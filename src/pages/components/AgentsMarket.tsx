@@ -1,7 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { fetchAgents } from '@src/shared/backgroundActions';
 import Agent from '@src/agent/agent';
-import { Box, Card, CardBody, Divider, Heading, Stack, Switch, Text, Wrap, WrapItem } from '@chakra-ui/react';
+import {
+  Box,
+  Card,
+  CardBody,
+  Divider,
+  Heading,
+  Stack,
+  Switch,
+  Text,
+  useColorModeValue,
+  Wrap,
+  WrapItem,
+} from '@chakra-ui/react';
 
 type AgentCardProps = {
   agent: Agent;
@@ -11,6 +23,7 @@ type AgentCardProps = {
 
 function AgentCard({ agent, initialEnabled, onEnabledChange }: AgentCardProps) {
   const [enabled, setEnabled] = useState(initialEnabled || false);
+  const bg = useColorModeValue('gray.50', 'gray.600');
 
   useEffect(() => {
     if (onEnabledChange) {
@@ -19,7 +32,7 @@ function AgentCard({ agent, initialEnabled, onEnabledChange }: AgentCardProps) {
   }, [enabled, onEnabledChange]);
 
   return (
-    <Card width="260px" height="130px" bg="gray.50">
+    <Card width="260px" height="130px" bg={bg}>
       <CardBody>
         <Stack justifyContent="space-between" divider={<Divider borderColor="gray.200" />} spacing={1} height="100%">
           <Box height="70%">
@@ -125,9 +138,6 @@ export default function AgentsMarket() {
       };
     }
   }, []);
-
-  console.log('enabled agents', enabledAgents);
-  console.log('agents', agents);
 
   return (
     <Box>
