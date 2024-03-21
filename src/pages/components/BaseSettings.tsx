@@ -3,6 +3,8 @@
 
 import { useFormik } from 'formik';
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
   FormControl,
@@ -14,7 +16,7 @@ import {
   Link,
   VStack,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ACCESS_CODE_PREFIX,
   API_KEY_PREFIX,
@@ -99,7 +101,9 @@ export default function BaseSettings() {
         console.log('new activation');
       }
 
-      await saveGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS, { ...settings, apiKey: apiKey })
+      const newSettings = { ...settings, apiKey: apiKey };
+      setSettings(newSettings);
+      await saveGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS, newSettings)
         .then(() => {
           actions.setSubmitting(false);
           setSaved(true);
@@ -158,6 +162,14 @@ export default function BaseSettings() {
           Save
         </Button>
       </form>
+      <Box marginTop={5}>
+        {(!settings || !settings.apiKey) && (
+          <Alert status="error" borderRadius={5}>
+            <AlertIcon />
+            License key is not set. Please set your license key in the settings.
+          </Alert>
+        )}
+      </Box>
     </Box>
   );
 }

@@ -109,7 +109,10 @@ export default function App(props: Props) {
             aria-label="Back"
             variant="outline"
             icon={<ArrowBackIcon />}
-            onClick={() => setShowSettings(false)}
+            onClick={() => {
+              loadSettings();
+              setShowSettings(false);
+            }}
           />
           <Spacer />
           <CloseButton p={2} size="md" onClick={onClose} />
@@ -117,13 +120,7 @@ export default function App(props: Props) {
       )}
       {showSettings ? (
         <Box width="600px">
-          <Settings
-            onClosed={() => {
-              console.log('on settings closed');
-              loadSettings();
-              setShowSettings(false);
-            }}
-          />
+          <Settings />
         </Box>
       ) : (
         <CardBody padding="2">
