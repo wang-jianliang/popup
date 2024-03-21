@@ -7,6 +7,7 @@ import {
   CardBody,
   Divider,
   Heading,
+  Spinner,
   Stack,
   Switch,
   Text,
@@ -55,6 +56,7 @@ export default function AgentsMarket() {
   const [agents, setAgents] = useState<Map<string, Agent>>(new Map());
   const [enabledAgents, setEnabledAgents] = useState<Map<string, Agent>>(new Map());
   const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(false);
   const limit = 20;
 
   const loadMoreRef = useRef(null);
@@ -101,19 +103,26 @@ export default function AgentsMarket() {
     //   });
     // });
 
+    setLoading(true);
     console.log('fetch agents', offset, limit);
-    fetchAgents(offsetRef.current, limit).then(agents => {
-      console.log('fetched agents', agents);
-      // Append new agents to the existing ones
-      setAgents(prev => {
-        const newAgents = new Map(prev);
-        agents.forEach(agent => {
-          newAgents.set(agent.identifier, agent);
+    fetchAgents(offsetRef.current, limit)
+      .then(agents => {
+        console.log('fetched agents', agents);
+        // Append new agents to the existing ones
+        setAgents(prev => {
+          const newAgents = new Map(prev);
+          agents.forEach(agent => {
+            newAgents.set(agent.identifier, agent);
+          });
+          return newAgents;
         });
-        return newAgents;
+        setOffset(prev => prev + limit);
+        setLoading(false);
+      })
+      .catch(e => {
+        alert('Failed to fetch agents: ' + e);
+        setLoading(false);
       });
-      setOffset(prev => prev + limit);
-    });
   };
 
   useEffect(() => {
@@ -141,6 +150,7 @@ export default function AgentsMarket() {
 
   return (
     <Box>
+      {loading && <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />}
       <Wrap spacing={3} maxH="700px" overflow="auto">
         {Array.from(enabledAgents.keys()).map(id => {
           return (
@@ -169,7 +179,7 @@ export default function AgentsMarket() {
             </WrapItem>
           );
         })}
-        <Box ref={loadMoreRef}>No more agents</Box>
+        {!loading && <Box ref={loadMoreRef}>No more agents</Box>}
       </Wrap>
     </Box>
   );
