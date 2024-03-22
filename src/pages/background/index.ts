@@ -6,14 +6,15 @@ import {
   createNewSession,
   getMessages,
   getSession,
+  getSessions,
   saveMessage,
   saveMessages,
   updateMessage,
 } from '@pages/storage/chat';
-import { getSessions } from '@pages/content/storageUtils';
 import OnClickData = Menus.OnClickData;
 import { fetchAgents } from '@src/agent/agentService';
 import { getGlobalConfig, saveGlobalConfig } from '@pages/storage/global';
+import { deleteAgent, getAgents, saveAgent } from '../storage/agent';
 
 reloadOnUpdate('pages/background');
 
@@ -89,6 +90,12 @@ browser.runtime.onMessage.addListener(async (message: { command: string; data: a
       return await saveGlobalConfig(message.data.key, message.data.value);
     case 'getGlobalConfig':
       return await getGlobalConfig(message.data.key);
+    case 'getAgents':
+      return await getAgents(message.data);
+    case 'saveAgent':
+      return await saveAgent(message.data.key, message.data.agent);
+    case 'deleteAgent':
+      return await deleteAgent(message.data);
     default:
       console.log('unknown command:', command);
       return null;

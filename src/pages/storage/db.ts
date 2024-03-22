@@ -180,12 +180,18 @@ class ObjectStore<T> {
       throw new Error('Database is not open');
     }
 
-    return new Promise<Map<number, T>>((resolve, reject) => {
+    return new Promise<Map<number | string, T>>((resolve, reject) => {
+      // check if the object store exists
+      if (!this.db.objectStoreNames.contains(this.storeName)) {
+        resolve(new Map<number | string, T>());
+        return;
+      }
+
       const tx = this.db.transaction(this.storeName, 'readonly');
       const store = tx.objectStore(this.storeName);
       const request = store.openCursor();
       // const request = store.getAll(null, maxCount);
-      const items: Map<number, T> = new Map<number, T>();
+      const items: Map<number | string, T> = new Map<number | string, T>();
 
       request.onsuccess = () => {
         const cursor = request.result as IDBCursorWithValue;
@@ -228,7 +234,7 @@ class ObjectStore<T> {
   }
 
   // Delete the item in the object store
-  async deleteItem(id: number): Promise<void> {
+  async deleteItem(id: number | string): Promise<void> {
     console.log('delete item:', id);
     if (!this.db) {
       throw new Error('Database is not open');

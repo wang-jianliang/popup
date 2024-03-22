@@ -44,3 +44,15 @@ export const saveGlobalConfig = async (key: string, value: any) => {
 export const getGlobalConfig = async (key: string): Promise<any> => {
   return browser.runtime.sendMessage({ command: 'getGlobalConfig', data: { key } });
 };
+
+export const getAgents = async (maxCount: number): Promise<Map<string, Agent>> => {
+  return browser.runtime.sendMessage({ command: 'getAgents', data: maxCount });
+};
+
+export const saveAgent = async (key: string, agent: Agent): Promise<number> => {
+  return browser.runtime.sendMessage({ command: 'saveAgent', data: { key, agent } });
+};
+
+export const deleteAgent = async (id: string): Promise<void> => {
+  return browser.runtime.sendMessage({ command: 'deleteAgent', data: id });
+};

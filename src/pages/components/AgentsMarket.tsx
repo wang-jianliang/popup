@@ -15,6 +15,7 @@ import {
   Wrap,
   WrapItem,
 } from '@chakra-ui/react';
+import { deleteAgent, getAgents, saveAgent } from '../content/storageUtils';
 
 type AgentCardProps = {
   agent: Agent;
@@ -78,6 +79,7 @@ export default function AgentsMarket() {
         newAgents.set(id, agent);
         return newAgents;
       });
+      saveAgent(id, agent);
     } else {
       setEnabledAgents(prev => {
         const newAgents = new Map(prev);
@@ -89,39 +91,41 @@ export default function AgentsMarket() {
         newAgents.set(id, agent);
         return newAgents;
       });
+      deleteAgent(id);
     }
   };
 
   const loadAgents = () => {
-    // getAgents(1000).then(agents => {
-    //   setEnabledAgents(prev => {
-    //     const newAgents = new Map(prev);
-    //     agents.forEach((agent, id) => {
-    //       newAgents.set(id, agent);
-    //     });
-    //     return agents;
-    //   });
-    // });
-
     setLoading(true);
-    console.log('fetch agents', offset, limit);
-    fetchAgents(offsetRef.current, limit)
+    getAgents(1000)
       .then(agents => {
-        console.log('fetched agents', agents);
-        // Append new agents to the existing ones
-        setAgents(prev => {
-          const newAgents = new Map(prev);
-          agents.forEach(agent => {
-            newAgents.set(agent.identifier, agent);
-          });
-          return newAgents;
-        });
-        setOffset(prev => prev + limit);
-        setLoading(false);
+        console.log('get agents', agents);
+        const agentsMap = new Map(Object.entries(agents));
+        setEnabledAgents(agentsMap);
+        return agentsMap;
       })
-      .catch(e => {
-        alert('Failed to fetch agents: ' + e);
-        setLoading(false);
+      .then(existingAgents => {
+        console.log('fetch agents', offset, limit);
+        fetchAgents(offsetRef.current, limit)
+          .then(agents => {
+            console.log('fetched agents', agents);
+            // Append new agents to the existing ones
+            setAgents(prev => {
+              const newAgents = new Map(prev);
+              agents.forEach(agent => {
+                if (!existingAgents.has(agent.identifier)) {
+                  newAgents.set(agent.identifier, agent);
+                }
+              });
+              return newAgents;
+            });
+            setOffset(prev => prev + limit);
+            setLoading(false);
+          })
+          .catch(e => {
+            alert('Failed to fetch agents: ' + e);
+            setLoading(false);
+          });
       });
   };
 
