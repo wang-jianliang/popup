@@ -1,3 +1,9 @@
+// Description: Background script for the extension.
+
+// disable console
+console.info = function () {};
+console.log = console.info;
+
 import { MENU_ITEM_ID_OPEN_SIDE_PANEL } from '@root/src/constants';
 import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
 import { browser } from 'webextension-polyfill-ts';
