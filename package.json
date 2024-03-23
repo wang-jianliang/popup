@@ -1,7 +1,7 @@
 {
   "name": "popup",
   "version": "0.0.1",
-  "description": "An assitant powered by ChatGPT",
+  "description": "An assistant powered by ChatGPT",
   "license": "MIT",
   "repository": {
     "type": "git",
