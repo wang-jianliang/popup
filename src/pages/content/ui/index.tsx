@@ -67,14 +67,14 @@ const mouseUpHandler = async (event: UserEventType) => {
   lastMouseEvent = event;
 };
 
-// const mouseDownHandler = async (event: UserEventType) => {
-//   console.log('[content.js]. mouse down event:', event);
-//   await hideContainerView();
-// };
+const mouseDownHandler = async (event: UserEventType) => {
+  console.log('[content.js]. mouse down event:', event);
+  lastMouseEvent = event;
+};
 
 document.addEventListener('mouseup', mouseUpHandler);
 document.addEventListener('touchend', mouseUpHandler);
-// document.addEventListener('mousedown', mouseDownHandler);
+document.addEventListener('mousedown', mouseDownHandler);
 
 // Function called when a new message is received
 const messagesFromContextMenu = async (msg: BrowserMessage) => {
