@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { fetchAgents } from '@src/shared/backgroundActions';
+import { createAgentMenu, fetchAgents, removeAgentMenu } from '@src/shared/backgroundActions';
 import Agent from '@src/agent/agent';
 import {
   Box,
@@ -77,9 +77,13 @@ export default function AgentsMarket() {
       newAgents.delete(id);
       return newAgents;
     });
-    deleteAgent(id).catch(err => {
-      alert('Failed to disable agent: ' + err);
-    });
+    deleteAgent(id)
+      .then(async () => {
+        await removeAgentMenu(id);
+      })
+      .catch(err => {
+        alert('Failed to disable agent: ' + err);
+      });
   };
 
   const enableAgent = (enabled: boolean, id: string, agent: Agent) => {
@@ -92,9 +96,13 @@ export default function AgentsMarket() {
       newAgents.set(id, agent);
       return newAgents;
     });
-    saveAgent(id, agent).catch(err => {
-      alert('Failed to enable agent: ' + err);
-    });
+    saveAgent(id, agent)
+      .then(async () => {
+        await createAgentMenu(agent, id);
+      })
+      .catch(err => {
+        alert('Failed to enable agent: ' + err);
+      });
   };
 
   const loadAgents = () => {
