@@ -67,71 +67,64 @@ export default function AgentsMarket() {
     offsetRef.current = offset;
   }, [offset]);
 
-  const updateAgent = (enabled: boolean, id: string, agent: Agent) => {
-    if (enabled) {
-      setAgents(prev => {
-        const newAgents = new Map(prev);
-        newAgents.delete(id);
-        return newAgents;
-      });
-      setEnabledAgents(prev => {
-        const newAgents = new Map(prev);
-        newAgents.set(id, agent);
-        return newAgents;
-      });
-      saveAgent(id, agent);
-    } else {
-      setEnabledAgents(prev => {
-        const newAgents = new Map(prev);
-        newAgents.delete(id);
-        return newAgents;
-      });
-      setAgents(prev => {
-        const newAgents = new Map(prev);
-        newAgents.set(id, agent);
-        return newAgents;
-      });
-      deleteAgent(id);
+  const disableAgent = (id: string, agent: Agent) => {
+    console.log('disable agent:', id, agent);
+    if (!enabledAgents.has(id)) {
+      return;
     }
+    setEnabledAgents(prev => {
+      const newAgents = new Map(prev);
+      newAgents.delete(id);
+      return newAgents;
+    });
+    deleteAgent(id);
+  };
+
+  const enableAgent = (enabled: boolean, id: string, agent: Agent) => {
+    console.log('enable agent:', enabled, id, agent);
+    if (enabledAgents.has(id)) {
+      return;
+    }
+    setEnabledAgents(prev => {
+      const newAgents = new Map(prev);
+      newAgents.set(id, agent);
+      return newAgents;
+    });
+    saveAgent(id, agent);
   };
 
   const loadAgents = () => {
     setLoading(true);
-    getAgents(1000)
-      .then(agents => {
-        console.log('get agents', agents);
-        const agentsMap = new Map(Object.entries(agents));
-        setEnabledAgents(agentsMap);
-        return agentsMap;
-      })
-      .then(existingAgents => {
-        console.log('fetch agents', offset, limit);
-        fetchAgents(offsetRef.current, limit)
-          .then(agents => {
-            console.log('fetched agents', agents);
-            // Append new agents to the existing ones
-            setAgents(prev => {
-              const newAgents = new Map(prev);
-              agents.forEach(agent => {
-                if (!existingAgents.has(agent.identifier)) {
-                  newAgents.set(agent.identifier, agent);
-                }
-              });
-              return newAgents;
-            });
-            setOffset(prev => prev + limit);
-            setLoading(false);
-          })
-          .catch(e => {
-            alert('Failed to fetch agents: ' + e);
-            setLoading(false);
+    console.log('fetch agents', offset, limit);
+    fetchAgents(offsetRef.current, limit)
+      .then(async agents => {
+        console.log('fetched agents', agents);
+
+        // Load enabled agents from storage
+        const enabledAgentObjects = await getAgents(1000);
+        const enabledAgentsTemp = new Map<string, Agent>();
+        Object.keys(enabledAgentObjects).forEach(key => {
+          enabledAgentsTemp.set(key, enabledAgentObjects[key]);
+        });
+        console.log('enabled agents:', enabledAgentsTemp);
+
+        setEnabledAgents(enabledAgentsTemp);
+        // Append new agents to the existing ones
+        setAgents(prev => {
+          const newAgents = new Map(prev);
+          agents.forEach(agent => {
+            newAgents.set(agent.identifier, agent);
           });
+          return newAgents;
+        });
+        setOffset(prev => prev + limit);
+        setLoading(false);
+      })
+      .catch(e => {
+        alert('Failed to fetch agents: ' + e);
+        setLoading(false);
       });
   };
-
-  useEffect(() => {
-    loadAgents();
-  }, []);
 
   useEffect(() => {
     const target = loadMoreRef.current;
@@ -163,7 +156,9 @@ export default function AgentsMarket() {
                 initialEnabled={true}
                 agent={enabledAgents.get(id)}
                 onEnabledChange={enabled => {
-                  updateAgent(enabled, id, enabledAgents.get(id));
+                  if (!enabled) {
+                    disableAgent(id, enabledAgents.get(id));
+                  }
                 }}
               />
             </WrapItem>
@@ -171,13 +166,18 @@ export default function AgentsMarket() {
         })}
         <Divider marginY={2} w="90%" borderColor="gray" />
         {Array.from(agents.keys()).map(id => {
+          if (enabledAgents.has(id)) {
+            return null;
+          }
           return (
             <WrapItem key={id}>
               <AgentCard
                 initialEnabled={false}
                 agent={agents.get(id)}
                 onEnabledChange={enabled => {
-                  updateAgent(enabled, id, agents.get(id));
+                  if (enabled) {
+                    enableAgent(enabled, id, agents.get(id));
+                  }
                 }}
               />
             </WrapItem>

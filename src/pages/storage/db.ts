@@ -1,6 +1,6 @@
 import { DATABASE_NAME } from '@src/constants';
 
-const storeNames = ['message', 'session', 'global'];
+const storeNames = ['message', 'session', 'global', 'agent'];
 
 class ObjectStore<T> {
   static db: IDBDatabase | null = null;
@@ -182,10 +182,6 @@ class ObjectStore<T> {
 
     return new Promise<Map<number | string, T>>((resolve, reject) => {
       // check if the object store exists
-      if (!this.db.objectStoreNames.contains(this.storeName)) {
-        resolve(new Map<number | string, T>());
-        return;
-      }
 
       const tx = this.db.transaction(this.storeName, 'readonly');
       const store = tx.objectStore(this.storeName);
