@@ -15,6 +15,7 @@ import OnClickData = Menus.OnClickData;
 import { fetchAgents } from '@src/agent/agentService';
 import { getGlobalConfig, saveGlobalConfig } from '@pages/storage/global';
 import { deleteAgent, getAgents, saveAgent } from '../storage/agent';
+import { mapToArray } from '@root/utils/map';
 
 reloadOnUpdate('pages/background');
 
@@ -91,7 +92,7 @@ browser.runtime.onMessage.addListener(async (message: { command: string; data: a
     case 'getGlobalConfig':
       return await getGlobalConfig(message.data.key);
     case 'getAgents':
-      return await getAgents(message.data);
+      return mapToArray(await getAgents(message.data));
     case 'saveAgent':
       return await saveAgent(message.data.key, message.data.agent);
     case 'deleteAgent':

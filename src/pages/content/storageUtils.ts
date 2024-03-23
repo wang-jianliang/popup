@@ -2,6 +2,7 @@ import { ChatMessage } from '@pages/content/ui/types';
 import { ChatSession } from '@pages/storage/chat';
 import { browser } from 'webextension-polyfill-ts';
 import Agent from '@src/agent/agent';
+import { arrayToMap } from '@root/utils/map';
 
 export const storeNewMessage = async (sessionId: number, message: ChatMessage): Promise<number> => {
   console.log('store new message:', message);
@@ -46,7 +47,7 @@ export const getGlobalConfig = async (key: string): Promise<any> => {
 };
 
 export const getAgents = async (maxCount: number): Promise<Map<string, Agent>> => {
-  return browser.runtime.sendMessage({ command: 'getAgents', data: maxCount });
+  return arrayToMap(await browser.runtime.sendMessage({ command: 'getAgents', data: maxCount }));
 };
 
 export const saveAgent = async (key: string, agent: Agent): Promise<number> => {

@@ -179,6 +179,7 @@ class ObjectStore<T> {
     if (!this.db) {
       throw new Error('Database is not open');
     }
+    console.log('load items:', maxCount, this.storeName);
 
     return new Promise<Map<number | string, T>>((resolve, reject) => {
       // check if the object store exists
@@ -195,11 +196,13 @@ class ObjectStore<T> {
           items.set(cursor.primaryKey as number, cursor.value as T);
           cursor.continue();
         } else {
+          console.log('load items done:', items.size, maxCount, items);
           resolve(items);
         }
       };
 
       request.onerror = () => {
+        console.log('load items error:', request.error);
         reject(request.error);
       };
     });

@@ -77,7 +77,9 @@ export default function AgentsMarket() {
       newAgents.delete(id);
       return newAgents;
     });
-    deleteAgent(id);
+    deleteAgent(id).catch(err => {
+      alert('Failed to disable agent: ' + err);
+    });
   };
 
   const enableAgent = (enabled: boolean, id: string, agent: Agent) => {
@@ -90,25 +92,23 @@ export default function AgentsMarket() {
       newAgents.set(id, agent);
       return newAgents;
     });
-    saveAgent(id, agent);
+    saveAgent(id, agent).catch(err => {
+      alert('Failed to enable agent: ' + err);
+    });
   };
 
   const loadAgents = () => {
     setLoading(true);
-    console.log('fetch agents', offset, limit);
+    console.log('fetching agents', offset, limit);
     fetchAgents(offsetRef.current, limit)
       .then(async agents => {
         console.log('fetched agents', agents);
 
         // Load enabled agents from storage
-        const enabledAgentObjects = await getAgents(1000);
-        const enabledAgentsTemp = new Map<string, Agent>();
-        Object.keys(enabledAgentObjects).forEach(key => {
-          enabledAgentsTemp.set(key, enabledAgentObjects[key]);
-        });
-        console.log('enabled agents:', enabledAgentsTemp);
+        const enabledAgentFromStorage = await getAgents(1000);
+        console.log('enabled agents from storage:', enabledAgentFromStorage);
 
-        setEnabledAgents(enabledAgentsTemp);
+        setEnabledAgents(enabledAgentFromStorage);
         // Append new agents to the existing ones
         setAgents(prev => {
           const newAgents = new Map(prev);

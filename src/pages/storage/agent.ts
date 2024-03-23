@@ -10,7 +10,9 @@ export const saveAgent = async (id: string, agent: Agent): Promise<number> => {
 export const getAgents = async (maxCount: number): Promise<Map<string, Agent>> => {
   console.log('getAgents, maxCount:', maxCount);
   const agentStore: ObjectStore<Agent> = await new ObjectStore<Agent>('agent').open();
-  return (await agentStore.loadItems(maxCount)) as Map<string, Agent>;
+  const agents = await agentStore.loadItems(maxCount);
+  console.log('getAgents done:', agents);
+  return agents as Map<string, Agent>;
 };
 
 export const deleteAgent = async (id: string): Promise<void> => {
