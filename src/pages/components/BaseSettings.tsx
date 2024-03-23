@@ -146,7 +146,10 @@ export default function BaseSettings() {
                 </Button>
               </InputRightElement>
             </InputGroup>
-            <Link color="blue.400" href="https://store.hellogeek.work/checkout" isExternal>
+            <Link
+              color="blue.400"
+              href="https://store.hellogeek.work/checkout/buy/d65c00fe-29fc-4872-879a-bd424d437150"
+              isExternal>
               Get a license key <ExternalLinkIcon mx="2px" />
             </Link>
             <FormErrorMessage>{formik.errors.apiKey}</FormErrorMessage>
