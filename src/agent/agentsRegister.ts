@@ -1,8 +1,7 @@
-import { browser } from 'webextension-polyfill-ts';
-import { STORAGE_KEY_AGENTS } from '@src/constants';
 import * as AgentWhatIs from './whats-this.json';
 import * as AgentChat from './chat-with-the-bot.json';
 import Agent from '@src/agent/agent';
+import { getAgents } from '@pages/storage/agent';
 
 export default class AgentsLoader {
   private agents: Map<string, Agent>;
@@ -13,11 +12,13 @@ export default class AgentsLoader {
     ]);
   }
 
-  public async loadAgents() {
-    return await browser.storage.sync.get([STORAGE_KEY_AGENTS]).then(result => {
-      result[STORAGE_KEY_AGENTS] && (this.agents = result[STORAGE_KEY_AGENTS]);
-      return this.agents;
+  public async loadAgents(): Promise<Map<string, Agent>> {
+    await getAgents(1000).then(agents => {
+      agents.forEach((agent, id) => {
+        this.agents.set(id, agent);
+      });
     });
+    return this.agents;
   }
 
   public getAgent(id: string): Agent {
