@@ -37,7 +37,7 @@ async function createContainerView(x: number, y: number, agent: Agent, info: OnC
   reactRoot.render(
     <EmotionCacheProvider rootId={root.id}>
       <CustomChakraProvider shadowRootId={rootIntoShadow.id}>
-        <Box position="absolute" top={y} left={x}>
+        <Box position="fixed" top={y} left={x}>
           <App agent={agent} info={info} onClose={hideContainerView} />
         </Box>
       </CustomChakraProvider>
