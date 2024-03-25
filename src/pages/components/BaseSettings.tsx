@@ -78,7 +78,7 @@ export default function BaseSettings() {
       // If the API key starts with "ak-", perform an activation
       if (isLicenseKey(apiKey)) {
         // Perform activation
-        const licenseKey = startsWith(LICENSE_KEY_PREFIX) ? values.apiKey.slice(3) : values.apiKey;
+        const licenseKey = values.apiKey.startsWith(LICENSE_KEY_PREFIX) ? values.apiKey.slice(3) : values.apiKey;
         const instanceName = getDeviceId();
         const { statusCode, error, data } = await activateLicense(licenseKey, instanceName);
         if (statusCode !== 200) {
