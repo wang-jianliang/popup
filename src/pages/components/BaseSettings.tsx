@@ -95,8 +95,8 @@ export default function BaseSettings() {
           return;
         }
         await saveGlobalConfig(GLOBAL_CONFIG_KEY_ACTIVATION_DATA, activationData);
-        if (!apiKey.startsWith(API_KEY_PREFIX)) {
-          apiKey = `${API_KEY_PREFIX}${apiKey}`;
+        if (!apiKey.startsWith(LICENSE_KEY_PREFIX)) {
+          apiKey = `${LICENSE_KEY_PREFIX}${apiKey}`;
         }
         console.log('new activation');
       }
