@@ -36,7 +36,11 @@ export default function App(props: Props) {
   const [sessionId, setSessionId] = useState(-1);
 
   useEffect(() => {
+    if (!agent || !info) {
+      return;
+    }
     let prompt: string;
+    console.log('use agent', agent, 'info', info);
     if (info.selectionText) {
       prompt = agent.prompts.selection.replace('${selection}', info.selectionText);
     } else if (info.mediaType == 'image') {
@@ -63,7 +67,7 @@ export default function App(props: Props) {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [agent, info]);
 
   const bgColor = useColorModeValue('white', 'gray.700');
   const color = useColorModeValue('gray.700', 'white');
