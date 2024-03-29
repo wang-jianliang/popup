@@ -8,7 +8,7 @@
   "tags": ["common"],
   "prompts": {
     "selection": "${selection}\n",
-    "image": ""
+    "all": ""
   },
   "autoSend": false
 }

@@ -46,7 +46,6 @@ export default function App(props: Props) {
     } else if (info.mediaType == 'image') {
       prompt = agent.prompts.image;
     } else {
-      alert(`Unsupported media type: ${info.mediaType}`);
       return;
     }
 
