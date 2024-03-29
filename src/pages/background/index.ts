@@ -30,7 +30,7 @@ if (chrome.sidePanel) {
     .then(() => {
       browser.contextMenus.create({
         id: MENU_ITEM_ID_OPEN_SIDE_PANEL,
-        title: '[Popup] Open Side Panel',
+        title: '[Open Side Panel]',
         contexts: ['all'],
       });
     });
