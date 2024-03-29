@@ -9,11 +9,23 @@ import EngineSettings from '@src/engines/engineSettings';
 import { globalConfigKey_CurrentSessionId, getGlobalConfig, saveGlobalConfig } from '@pages/storage/global';
 import { SessionList } from '@pages/sidepanel/SessionList';
 import { GLOBAL_CONFIG_KEY_ENGINE_SETTINGS } from '@src/constants';
+import { createNewSession } from '@pages/content/storageUtils';
+import * as AgentChat from '@src/agent/chat-with-the-bot.json';
+import Agent from '@src/agent/agent';
 
 const SidePanel = () => {
   const [sessions, setSessions] = useState<Map<number, ChatSession>>(new Map<number, ChatSession>());
   const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
   const [settings, setSettings] = useState<EngineSettings | null>(null);
+
+  const createNewChat = () => {
+    createNewSession('', AgentChat as Agent).then(id => {
+      setCurrentSessionId(id);
+      getSessions(100).then(sessions => {
+        setSessions(sessions);
+      });
+    });
+  };
 
   useEffect(() => {
     getGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS).then((settings: EngineSettings) => {
@@ -51,7 +63,9 @@ const SidePanel = () => {
       </GridItem>
       <GridItem area={'nav'} bgColor="gray.50">
         <Box p={2}>
-          <Button width="100%">New Chat</Button>
+          <Button width="100%" onClick={createNewChat}>
+            New Chat
+          </Button>
         </Box>
         <Divider />
         {sessions.size == 0 && (

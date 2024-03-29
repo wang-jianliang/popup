@@ -53,19 +53,21 @@ type Props = {
 export const SessionList = ({ sessions, currentSessionId, onSessionChanged, onSessionClosed }: Props) => {
   return (
     <List spacing={3} padding={2} overflowY="auto" maxH="100%">
-      {Array.from(sessions).map(([id, session]) => {
-        return (
-          <ListItem key={id} width="100%">
-            <SessionCard
-              id={id}
-              session={session}
-              currentSessionId={currentSessionId}
-              onClick={() => onSessionChanged(id)}
-              onClose={() => onSessionClosed(id)}
-            />
-          </ListItem>
-        );
-      })}
+      {Array.from(sessions)
+        .sort((a, b) => b[0] - a[0])
+        .map(([id, session]) => {
+          return (
+            <ListItem key={id} width="100%">
+              <SessionCard
+                id={id}
+                session={session}
+                currentSessionId={currentSessionId}
+                onClick={() => onSessionChanged(id)}
+                onClose={() => onSessionClosed(id)}
+              />
+            </ListItem>
+          );
+        })}
     </List>
   );
 };

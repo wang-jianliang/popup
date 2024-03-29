@@ -54,7 +54,6 @@ export async function createAgentMenus() {
       // This will open the panel in all the pages on the current window.
       // Only chrome supports this feature.
       await chrome.sidePanel.open({ windowId: tab.windowId });
-      await browser.sidebarAction.open();
     } else {
       tab.id &&
         (await browser.tabs.sendMessage(tab.id, {
