@@ -27,10 +27,12 @@ import { RepeatIcon } from '@chakra-ui/icons';
 import { ChatSession } from '@pages/storage/chat';
 import { LICENSE_KEY_PREFIX, GLOBAL_CONFIG_KEY_ACTIVATION_DATA } from '@src/constants';
 import { type ActivateLicense } from '@lemonsqueezy/lemonsqueezy.js';
+import { getEngineModel, getEngineType } from '@src/agent/agent';
 
 type Props = {
   settings: EngineSettings | null;
   preInput?: string;
+  inputType?: string;
   sessionId: number;
   systemPrompt?: string;
   newMessages?: ChatMessage[];
@@ -40,9 +42,10 @@ type Props = {
 };
 
 function ChatBox(
-  { settings, preInput, sessionId, systemPrompt, newMessages, onClearMessages, minW, maxH }: Props = {
+  { settings, preInput, inputType, sessionId, systemPrompt, newMessages, onClearMessages, minW, maxH }: Props = {
     settings: null,
     preInput: null,
+    inputType: '',
     sessionId: -1,
     newMessages: [],
     minW: 'min-content',
@@ -122,10 +125,10 @@ function ChatBox(
       });
     }
 
-    const engine = getEngine(session.agent.engine, newSettings);
+    const engine = getEngine(getEngineType(session.agent, inputType), newSettings);
 
     await engine.complete(
-      session.agent.models[0],
+      getEngineModel(session.agent, inputType),
       systemPrompt ? [{ role: 'system', content: systemPrompt }, ...newMessages] : newMessages,
       (text: string) => {
         setIncomingMessage((prev: string) => prev + text);

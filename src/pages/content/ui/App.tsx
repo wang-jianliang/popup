@@ -19,6 +19,8 @@ import { createNewSession, getGlobalConfig } from '@pages/content/storageUtils';
 import EngineSettings from '@src/engines/engineSettings';
 import Settings from '@pages/content/Settings/Settings';
 import OnClickData = Menus.OnClickData;
+import AgentV1 from '@src/agent/agentV1';
+import AgentV2 from '@src/agent/agentV2';
 
 interface Props {
   agent?: Agent;
@@ -30,6 +32,7 @@ export default function App(props: Props) {
   const { agent, info, onClose } = props;
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState(null);
+  const [systemPrompt, setSystemPrompt] = useState(null);
   const [settings, setSettings] = useState<EngineSettings | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -39,12 +42,35 @@ export default function App(props: Props) {
     if (!agent || !info) {
       return;
     }
-    let prompt: string;
+    let textPrompt: string;
+    let textSystemPrompt: string;
+    let imagePrompt: string;
+    let imageSystemPrompt: string;
     console.log('use agent', agent, 'info', info);
+    switch (agent.schemaVersion) {
+      case 1:
+        textPrompt = (agent as AgentV1).prompts.selection;
+        imagePrompt = (agent as AgentV1).prompts.image;
+        textSystemPrompt = (agent as AgentV1).systemPrompt;
+        imageSystemPrompt = (agent as AgentV1).systemPrompt;
+        break;
+      case 2:
+        textPrompt = (agent as AgentV2).engine.selection.prompt;
+        imagePrompt = (agent as AgentV2).engine.image.prompt;
+        textSystemPrompt = (agent as AgentV2).engine.selection.systemPrompt;
+        imageSystemPrompt = (agent as AgentV2).engine.image.systemPrompt;
+        break;
+      default:
+        throw new Error('Unknown schema version');
+    }
+
+    let prompt: string;
     if (info.selectionText) {
-      prompt = agent.prompts.selection.replace('${selection}', info.selectionText);
+      prompt = textPrompt.replace('${selection}', info.selectionText);
+      setSystemPrompt(textSystemPrompt);
     } else if (info.mediaType == 'image') {
-      prompt = agent.prompts.image;
+      prompt = imagePrompt;
+      setSystemPrompt(imageSystemPrompt);
     } else {
       return;
     }
@@ -131,7 +157,7 @@ export default function App(props: Props) {
             <ChatBox
               settings={settings}
               preInput={input}
-              systemPrompt={agent.systemPrompt}
+              systemPrompt={systemPrompt}
               sessionId={sessionId}
               newMessages={messages}
               minW="400px"
