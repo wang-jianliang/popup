@@ -96,7 +96,7 @@ const SidePanel = () => {
         />
       </GridItem>
       <GridItem pl="2" area={'main'}>
-        {currentSessionId && <ChatBox settings={settings} sessionId={currentSessionId} />}
+        {currentSessionId && <ChatBox inputType="selection" settings={settings} sessionId={currentSessionId} />}
       </GridItem>
     </Grid>
   );

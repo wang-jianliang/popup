@@ -7,9 +7,11 @@ import {
   Divider,
   Flex,
   Heading,
+  HStack,
   IconButton,
   List,
   ListItem,
+  Spinner,
   Text,
   Textarea,
   useColorModeValue,
@@ -258,7 +260,12 @@ function ChatBox(
                           index === messagesState.messages.length - 1 && !isCompleteChat(messagesState.messages) && (
                             <Center>
                               {generating ? (
-                                <Text padding={1}>Generating...</Text>
+                                <HStack spacing={1} marginLeft={1}>
+                                  <Spinner size="sm" padding={1} />
+                                  <Text size="sm" padding={1}>
+                                    Thinking...
+                                  </Text>
+                                </HStack>
                               ) : (
                                 <IconButton
                                   onClick={onRetry}
