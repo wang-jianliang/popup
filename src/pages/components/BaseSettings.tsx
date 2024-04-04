@@ -137,7 +137,7 @@ export default function BaseSettings() {
                   setSaved(false);
                   formik.handleBlur(e);
                 }}
-                placeholder="Please input your license key"
+                placeholder="Please input your API key or license key"
                 type={showLicenseKey ? 'text' : 'password'}
               />
               <InputRightElement width="4.5rem">
