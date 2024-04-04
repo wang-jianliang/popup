@@ -6,7 +6,7 @@ export default interface AgentV2 {
   name: string;
   description: string;
   tags: string[];
-  engine: {
+  engines: {
     [key in Menus.ContextType]: {
       type: EngineType;
       model: string;

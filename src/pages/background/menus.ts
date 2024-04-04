@@ -2,14 +2,14 @@ import { browser, Menus } from 'webextension-polyfill-ts';
 import AgentsLoader from '@src/agent/agentsRegister';
 import { MENU_ITEM_ID_OPEN_SIDE_PANEL, MESSAGE_TYPE_MENU_CLICKED } from '@src/constants';
 import OnClickData = Menus.OnClickData;
-import Agent from '@src/agent/agent';
+import Agent, { getContextTypes } from '@src/agent/agent';
 
 export async function createAgentMenu(agent: Agent, id: string) {
   console.log('add agent:', agent, id, 'to menu:');
   browser.contextMenus.create({
     id: id,
     title: agent.name,
-    contexts: Object.keys(agent.prompts) as unknown as Menus.ContextType[],
+    contexts: getContextTypes(agent) as Menus.ContextType[],
   });
 }
 
@@ -41,7 +41,7 @@ export async function createAgentMenus() {
       browser.contextMenus.create({
         id: id,
         title: agent.name,
-        contexts: Object.keys(agent.prompts) as unknown as Menus.ContextType[],
+        contexts: getContextTypes(agent) as Menus.ContextType[],
       });
     });
   });

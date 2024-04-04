@@ -13,14 +13,12 @@ import {
 import React, { useEffect, useState } from 'react';
 import { GLOBAL_CONFIG_KEY_ENGINE_SETTINGS } from '@src/constants';
 import { Menus } from 'webextension-polyfill-ts';
-import Agent from '@src/agent/agent';
+import Agent, { getPrompt, getSystemPrompt } from '@src/agent/agent';
 import { ArrowBackIcon, SettingsIcon } from '@chakra-ui/icons';
 import { createNewSession, getGlobalConfig } from '@pages/content/storageUtils';
 import EngineSettings from '@src/engines/engineSettings';
 import Settings from '@pages/content/Settings/Settings';
 import OnClickData = Menus.OnClickData;
-import AgentV1 from '@src/agent/agentV1';
-import AgentV2 from '@src/agent/agentV2';
 
 interface Props {
   agent?: Agent;
@@ -42,34 +40,16 @@ export default function App(props: Props) {
     if (!agent || !info) {
       return;
     }
-    let textPrompt: string;
-    let textSystemPrompt: string;
-    let imagePrompt: string;
-    let imageSystemPrompt: string;
     console.log('use agent', agent, 'info', info);
-    switch (agent.schemaVersion) {
-      case 1:
-        textPrompt = (agent as AgentV1).prompts.selection;
-        imagePrompt = (agent as AgentV1).prompts.image;
-        textSystemPrompt = (agent as AgentV1).systemPrompt;
-        imageSystemPrompt = (agent as AgentV1).systemPrompt;
-        break;
-      case 2:
-        textPrompt = (agent as AgentV2).engine.selection.prompt;
-        imagePrompt = (agent as AgentV2).engine.image.prompt;
-        textSystemPrompt = (agent as AgentV2).engine.selection.systemPrompt;
-        imageSystemPrompt = (agent as AgentV2).engine.image.systemPrompt;
-        break;
-      default:
-        throw new Error('Unknown schema version');
-    }
 
     let prompt: string;
     if (info.selectionText) {
-      prompt = textPrompt.replace('${selection}', info.selectionText);
+      prompt = getPrompt(agent, 'selection').replace('${selection}', info.selectionText);
+      const textSystemPrompt = getSystemPrompt(agent, 'selection');
       setSystemPrompt(textSystemPrompt);
     } else if (info.mediaType == 'image') {
-      prompt = imagePrompt;
+      prompt = getPrompt(agent, 'image');
+      const imageSystemPrompt = getSystemPrompt(agent, 'image');
       setSystemPrompt(imageSystemPrompt);
     } else {
       return;

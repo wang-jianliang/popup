@@ -11,7 +11,7 @@ import { SessionList } from '@pages/sidepanel/SessionList';
 import { GLOBAL_CONFIG_KEY_ENGINE_SETTINGS } from '@src/constants';
 import { createNewSession } from '@pages/content/storageUtils';
 import * as AgentChat from '@src/agent/chat-with-the-bot.json';
-import Agent from '@src/agent/agent';
+import AgentV2 from '@src/agent/agentV2';
 
 const SidePanel = () => {
   const [sessions, setSessions] = useState<Map<number, ChatSession>>(new Map<number, ChatSession>());
@@ -19,7 +19,7 @@ const SidePanel = () => {
   const [settings, setSettings] = useState<EngineSettings | null>(null);
 
   const createNewChat = () => {
-    createNewSession('', AgentChat as Agent).then(id => {
+    createNewSession('', AgentChat as unknown as AgentV2).then(id => {
       setCurrentSessionId(id);
       getSessions(100).then(sessions => {
         setSessions(sessions);
