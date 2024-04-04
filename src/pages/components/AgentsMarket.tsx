@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { createAgentMenu, fetchAgents, removeAgentMenu } from '@src/shared/backgroundActions';
-import Agent from '@src/agent/agent';
+import Agent, { getContextTypes } from '@src/agent/agent';
 import {
+  Badge,
   Box,
   Card,
   CardBody,
   Divider,
   Heading,
+  HStack,
   Spinner,
   Stack,
   Switch,
@@ -41,10 +43,14 @@ function AgentCard({ agent, initialEnabled, onEnabledChange }: AgentCardProps) {
             <Heading size="sm">{agent.name}</Heading>
             <Text fontSize="12px">{agent.description}</Text>
           </Box>
-          <Box justifyContent="space-between" display="flex" alignItems="center">
-            <Text fontSize="10px" color="gray">
-              {agent.engine}({agent.models[0]})
-            </Text>
+          <Box marginTop={2} justifyContent="space-between" display="flex" alignItems="center">
+            <HStack width="100%" spacing={2}>
+              {getContextTypes(agent).map(contextType => (
+                <Badge variant="outline" key={contextType}>
+                  {contextType}
+                </Badge>
+              ))}
+            </HStack>
             <Switch isChecked={enabled} onChange={event => setEnabled(event.target.checked)} />
           </Box>
         </Stack>
