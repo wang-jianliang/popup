@@ -5,6 +5,7 @@ import useStorage from '@src/shared/hooks/useStorage';
 import exampleThemeStorage from '@src/shared/storages/exampleThemeStorage';
 import withSuspense from '@src/shared/hoc/withSuspense';
 import withErrorBoundary from '@src/shared/hoc/withErrorBoundary';
+import Settings from '@pages/content/Settings/Settings';
 
 const Popup = () => {
   const theme = useStorage(exampleThemeStorage);
@@ -18,6 +19,7 @@ const Popup = () => {
       <header className="App-header" style={{ color: theme === 'light' ? '#000' : '#fff' }}>
         <img src={logo} className="App-logo" alt="logo" />
       </header>
+      <Settings />
     </div>
   );
 };
