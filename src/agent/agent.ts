@@ -50,6 +50,7 @@ export function getContextTypes(agent: Agent): string[] {
 }
 
 export function getEngineType(agent: Agent, inputType: string): EngineType {
+  console.log('getEngineType', agent, inputType);
   switch (agent.schemaVersion) {
     case 1:
       return (agent as AgentV1).engine;

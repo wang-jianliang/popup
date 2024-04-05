@@ -4,10 +4,12 @@ import {
   Button,
   Card,
   CardBody,
+  Center,
   CloseButton,
   Flex,
   IconButton,
   Spacer,
+  Text,
   useColorModeValue,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
@@ -19,6 +21,8 @@ import { createNewSession, getGlobalConfig } from '@pages/content/storageUtils';
 import EngineSettings from '@src/engines/engineSettings';
 import Settings from '@pages/content/Settings/Settings';
 import OnClickData = Menus.OnClickData;
+import { getDeviceId } from '@src/utils';
+import apiClient from '@src/shared/apiService';
 
 interface Props {
   agent?: Agent;
@@ -30,11 +34,13 @@ export default function App(props: Props) {
   const { agent, info, onClose } = props;
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState(null);
+  const [inputType, setInputType] = useState(null);
   const [systemPrompt, setSystemPrompt] = useState(null);
   const [settings, setSettings] = useState<EngineSettings | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
   const [sessionId, setSessionId] = useState(-1);
+  const [trailRemaining, setTrailRemaining] = useState(1);
 
   useEffect(() => {
     if (!agent || !info) {
@@ -46,10 +52,12 @@ export default function App(props: Props) {
     if (info.selectionText) {
       prompt = getPrompt(agent, 'selection').replace('${selection}', info.selectionText);
       const textSystemPrompt = getSystemPrompt(agent, 'selection');
+      setInputType('selection');
       setSystemPrompt(textSystemPrompt);
     } else if (info.mediaType == 'image') {
       prompt = getPrompt(agent, 'image');
       const imageSystemPrompt = getSystemPrompt(agent, 'image');
+      setInputType('image');
       setSystemPrompt(imageSystemPrompt);
     } else {
       return;
@@ -74,13 +82,15 @@ export default function App(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent, info]);
 
+  const deviceID = getDeviceId();
+
   const bgColor = useColorModeValue('white', 'gray.700');
   const color = useColorModeValue('gray.700', 'white');
 
   const loadSettings = () => {
     getGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS).then((settings: EngineSettings) => {
       console.log('load settings', settings);
-      if (!settings) {
+      if (!settings && trailRemaining <= 0) {
         setShowSettings(true);
         return;
       }
@@ -90,16 +100,28 @@ export default function App(props: Props) {
   };
 
   useEffect(() => {
-    loadSettings();
+    apiClient.fetch('GET', `/trail/${deviceID}`).then(async response => {
+      const trail = await response.json();
+      setTrailRemaining(trail.remaining);
+    });
   }, []);
+
+  useEffect(() => {
+    if (trailRemaining <= 0) {
+      loadSettings();
+    }
+  }, [trailRemaining]);
 
   return (
     <Card bg={bgColor} color={color} lineHeight={5} maxW="100%" maxWidth="600px" zIndex={10000}>
       {!showSettings ? (
         <Flex p={2}>
-          {settings?.apiKey && <Button p={2}>{agent.name}</Button>}
+          <Button size="sm" p={2}>
+            {agent.name}
+          </Button>
           <IconButton
             aria-label="Open settings"
+            size="sm"
             icon={<SettingsIcon />}
             marginLeft={2}
             onClick={() => {
@@ -108,6 +130,11 @@ export default function App(props: Props) {
               setShowSettings(true);
             }}
           />
+          {!settings || !settings.apiKey ? (
+            <Center>
+              <Text marginLeft={2}>free trials: {trailRemaining}</Text>
+            </Center>
+          ) : null}
           <Spacer />
           <CloseButton p={2} size="md" onClick={onClose} />
         </Flex>
@@ -133,10 +160,11 @@ export default function App(props: Props) {
         </Box>
       ) : (
         <CardBody padding="2">
-          {sessionId > 0 && (
+          {sessionId > 0 && inputType && (
             <ChatBox
               settings={settings}
               preInput={input}
+              inputType={inputType}
               systemPrompt={systemPrompt}
               sessionId={sessionId}
               newMessages={messages}

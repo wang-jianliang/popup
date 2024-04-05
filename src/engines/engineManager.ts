@@ -8,9 +8,6 @@ export const getEngine = (engineType: EngineType, settings: EngineSettings): Eng
     default:
       throw new Error(`Unknown engine: ${engineType}`);
     case EngineType.ChatGPT:
-      if (!settings || !settings.apiKey) {
-        throw new Error('API key is required for ChatGPT engine');
-      }
-      return new ChatGPT(settings.apiKey);
+      return new ChatGPT(settings ? settings.apiKey : '');
   }
 };

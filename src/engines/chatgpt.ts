@@ -4,6 +4,7 @@ import { ChatMessage } from '@pages/content/ui/types';
 import { API_BASE_URL } from '@src/constants';
 import { EventStreamContentType, fetchEventSource } from '@fortaine/fetch-event-source';
 import { prettyObject } from '@root/utils/format';
+import { getDeviceId } from '@src/utils';
 
 interface Model {
   id: string;
@@ -48,8 +49,12 @@ export class ChatGPT implements Engine {
     this.headers = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      Authorization: `Bearer ${APIKey}`,
+      'Device-ID': getDeviceId(),
     };
+    if (APIKey) {
+      this.headers['Authorization'] = `Bearer ${APIKey}`;
+    }
+
     this.client = new ApiClient({
       baseURL: `${API_BASE_URL}/api/openai/v1`,
       headers: this.headers,
