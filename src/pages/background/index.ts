@@ -36,5 +36,5 @@ if (chrome.sidePanel) {
     });
 }
 
-createAgentMenus().then(() => console.log('agent menus created'));
 registryCommands();
+createAgentMenus().then(() => console.log('agent menus created'));
