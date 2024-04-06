@@ -21,7 +21,6 @@ import { createNewSession, getGlobalConfig } from '@pages/content/storageUtils';
 import EngineSettings from '@src/engines/engineSettings';
 import Settings from '@pages/content/Settings/Settings';
 import OnClickData = Menus.OnClickData;
-import { getDeviceId } from '@src/utils';
 import apiClient from '@src/shared/apiService';
 
 interface Props {
@@ -82,8 +81,6 @@ export default function App(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent, info]);
 
-  const deviceID = getDeviceId();
-
   const bgColor = useColorModeValue('white', 'gray.700');
   const color = useColorModeValue('gray.700', 'white');
 
@@ -100,7 +97,7 @@ export default function App(props: Props) {
   };
 
   useEffect(() => {
-    apiClient.fetch('GET', `/trail/${deviceID}`).then(async response => {
+    apiClient.fetch('GET', '/trail').then(async response => {
       const trail = await response.json();
       setTrailRemaining(trail.remaining);
     });
