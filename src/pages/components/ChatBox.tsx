@@ -46,6 +46,7 @@ type Props = {
   systemPrompt?: string;
   newMessages?: ChatMessage[];
   onClearMessages?: (messages: ChatMessage[]) => void;
+  onSettingsClosed?: () => void;
   minW?: string;
   maxH?: string;
 };
@@ -56,7 +57,17 @@ export interface ChatBoxHandles {
 
 const ChatBox = React.forwardRef<ChatBoxHandles, Props>(
   (
-    { preInput, inputType, sessionId, systemPrompt, newMessages, onClearMessages, minW, maxH }: Props = {
+    {
+      preInput,
+      inputType,
+      sessionId,
+      systemPrompt,
+      newMessages,
+      onClearMessages,
+      onSettingsClosed,
+      minW,
+      maxH,
+    }: Props = {
       preInput: null,
       inputType: '',
       sessionId: -1,
@@ -87,6 +98,13 @@ const ChatBox = React.forwardRef<ChatBoxHandles, Props>(
     const scrollToAnchor = () => {
       messagesEndRef.current?.scrollBy({ top: messagesEndRef.current.scrollHeight });
     };
+
+    useEffect(() => {
+      if (showSettings) {
+        return;
+      }
+      onSettingsClosed && showSettings && onSettingsClosed();
+    }, [showSettings]);
 
     useEffect(() => {
       apiClient.fetch('GET', '/trail').then(async response => {
@@ -183,7 +201,6 @@ const ChatBox = React.forwardRef<ChatBoxHandles, Props>(
         err => {
           console.log('completion error:', err);
           setGenerating(false);
-          alert(err);
         },
       );
     };
@@ -281,7 +298,9 @@ const ChatBox = React.forwardRef<ChatBoxHandles, Props>(
           <Spacer />
           <Box />
         </Flex>
-        <Settings />
+        <Box width="600px">
+          <Settings />
+        </Box>
       </Box>
     ) : (
       <Flex padding={0.5} h="100%">

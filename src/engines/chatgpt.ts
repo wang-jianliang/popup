@@ -151,7 +151,7 @@ export class ChatGPT implements Engine {
               message = FREE_TRAIL_LIMIT_REACHED;
             }
             onError && onError(message);
-            return finish();
+            throw new Error(message);
           }
 
           if (extraInfo) {
