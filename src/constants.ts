@@ -17,5 +17,5 @@ export const DEFAULT_MODEL = 'gpt-3.5-turbo';
 // datastore
 export const DATABASE_NAME = 'database';
 
-export const AGENT_STORE_BASE_URL = 'https://popup-agents.hellogeek.work/api/market';
 export const API_BASE_URL = 'https://popup-api.hellogeek.work';
+export const AGENT_STORE_BASE_URL = `${API_BASE_URL}/api/market`;

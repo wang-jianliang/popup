@@ -26,24 +26,6 @@ export async function removeAgentMenu(id: string) {
 export async function createAgentMenus() {
   const agentsRegistry = new AgentsLoader();
 
-  browser.contextMenus?.onClicked.addListener(async function (info: OnClickData, tab) {
-    const agent = agentsRegistry.getAgent(<string>info.menuItemId);
-
-    console.log('[background.js', 'contextMenus onClicked', info);
-    if (info.menuItemId === MENU_ITEM_ID_OPEN_SIDE_PANEL) {
-      // This will open the panel in all the pages on the current window.
-      // Only chrome supports this feature.
-      await chrome.sidePanel.open({ windowId: tab.windowId });
-    } else {
-      tab.id &&
-        (await browser.tabs.sendMessage(tab.id, {
-          type: MESSAGE_TYPE_MENU_CLICKED,
-          agent: agent,
-          info: info,
-        }));
-    }
-  });
-
   await agentsRegistry.loadAgents().then(agents => {
     console.log('agents loaded', agents);
     agents.forEach(async (agent, id) => {
@@ -62,5 +44,23 @@ export async function createAgentMenus() {
         contexts: getContextTypes(agent) as Menus.ContextType[],
       });
     });
+  });
+
+  browser.contextMenus?.onClicked.addListener(async function (info: OnClickData, tab) {
+    const agent = agentsRegistry.getAgent(<string>info.menuItemId);
+
+    console.log('[background.js', 'contextMenus onClicked', info);
+    if (info.menuItemId === MENU_ITEM_ID_OPEN_SIDE_PANEL) {
+      // This will open the panel in all the pages on the current window.
+      // Only chrome supports this feature.
+      await chrome.sidePanel.open({ windowId: tab.windowId });
+    } else {
+      tab.id &&
+        (await browser.tabs.sendMessage(tab.id, {
+          type: MESSAGE_TYPE_MENU_CLICKED,
+          agent: agent,
+          info: info,
+        }));
+    }
   });
 }

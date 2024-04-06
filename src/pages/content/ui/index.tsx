@@ -17,6 +17,7 @@ refreshOnUpdate('pages/content');
 let reactRoot: Root | null = null;
 
 async function createContainerView(x: number, y: number, agent: Agent, info: OnClickData) {
+  console.log('[content.js]. createContainerView:', x, y, agent, info);
   const root = document.createElement('div');
   root.id = contentContainerViewId;
 
