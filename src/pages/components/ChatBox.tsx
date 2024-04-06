@@ -107,12 +107,17 @@ const ChatBox = React.forwardRef<ChatBoxHandles, Props>(
     }, [showSettings]);
 
     useEffect(() => {
-      apiClient.fetch('GET', '/trail').then(async response => {
-        const trail = await response.json();
-        if (trail.remaining < 0) {
-          setShowSettings(true);
+      loadSettings().then((settings: EngineSettings) => {
+        if (settings && settings.apiKey) {
+          return;
         }
-        setRemainingTrial(trail.remaining);
+        apiClient.fetch('GET', '/trail').then(async response => {
+          const trail = await response.json();
+          if (trail.remaining < 0) {
+            setShowSettings(true);
+          }
+          setRemainingTrial(trail.remaining);
+        });
       });
     }, []);
 
@@ -264,8 +269,8 @@ const ChatBox = React.forwardRef<ChatBoxHandles, Props>(
       };
     }, []);
 
-    const loadSettings = () => {
-      getGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS).then((settings: EngineSettings) => {
+    const loadSettings = async () => {
+      return await getGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS).then((settings: EngineSettings) => {
         console.log('load settings', settings);
         if (!settings && remainingTrial < 0) {
           setShowSettings(true);
@@ -273,6 +278,7 @@ const ChatBox = React.forwardRef<ChatBoxHandles, Props>(
         }
         setSettings(settings);
         setShowSettings(false);
+        return settings;
       });
     };
 
