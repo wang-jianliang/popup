@@ -1,27 +1,11 @@
-import ChatBox from '@pages/components/ChatBox';
-import {
-  Box,
-  Button,
-  Card,
-  CardBody,
-  Center,
-  CloseButton,
-  Flex,
-  IconButton,
-  Spacer,
-  Text,
-  useColorModeValue,
-} from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
-import { GLOBAL_CONFIG_KEY_ENGINE_SETTINGS } from '@src/constants';
+import ChatBox, { ChatBoxHandles } from '@pages/components/ChatBox';
+import { Button, Card, CardBody, CloseButton, Flex, IconButton, Spacer, useColorModeValue } from '@chakra-ui/react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Menus } from 'webextension-polyfill-ts';
 import Agent, { getPrompt, getSystemPrompt } from '@src/agent/agent';
-import { ArrowBackIcon, SettingsIcon } from '@chakra-ui/icons';
-import { createNewSession, getGlobalConfig } from '@pages/content/storageUtils';
-import EngineSettings from '@src/engines/engineSettings';
-import Settings from '@pages/content/Settings/Settings';
+import { SettingsIcon } from '@chakra-ui/icons';
+import { createNewSession } from '@pages/content/storageUtils';
 import OnClickData = Menus.OnClickData;
-import apiClient from '@src/shared/apiService';
 
 interface Props {
   agent?: Agent;
@@ -35,11 +19,9 @@ export default function App(props: Props) {
   const [input, setInput] = useState(null);
   const [inputType, setInputType] = useState(null);
   const [systemPrompt, setSystemPrompt] = useState(null);
-  const [settings, setSettings] = useState<EngineSettings | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
-
   const [sessionId, setSessionId] = useState(-1);
-  const [trailRemaining, setTrailRemaining] = useState(1);
+
+  const chatBoxRef = useRef<ChatBoxHandles | null>(null);
 
   useEffect(() => {
     if (!agent || !info) {
@@ -84,93 +66,40 @@ export default function App(props: Props) {
   const bgColor = useColorModeValue('white', 'gray.700');
   const color = useColorModeValue('gray.700', 'white');
 
-  const loadSettings = () => {
-    getGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS).then((settings: EngineSettings) => {
-      console.log('load settings', settings);
-      if (!settings && trailRemaining <= 0) {
-        setShowSettings(true);
-        return;
-      }
-      setSettings(settings);
-      setShowSettings(false);
-    });
-  };
-
-  useEffect(() => {
-    apiClient.fetch('GET', '/trail').then(async response => {
-      const trail = await response.json();
-      setTrailRemaining(trail.remaining);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (trailRemaining <= 0) {
-      loadSettings();
-    }
-  }, [trailRemaining]);
-
   return (
     <Card bg={bgColor} color={color} lineHeight={5} maxW="100%" maxWidth="600px" zIndex={10000}>
-      {!showSettings ? (
-        <Flex p={2}>
-          <Button size="sm" p={2}>
-            {agent.name}
-          </Button>
-          <IconButton
-            aria-label="Open settings"
-            size="sm"
-            icon={<SettingsIcon />}
-            marginLeft={2}
-            onClick={() => {
-              // Clear messages before showing settings
-              setMessages([]);
-              setShowSettings(true);
-            }}
+      <Flex p={2}>
+        <Button size="sm" p={2}>
+          {agent.name}
+        </Button>
+        <IconButton
+          aria-label="Open settings"
+          size="sm"
+          icon={<SettingsIcon />}
+          marginLeft={2}
+          onClick={() => {
+            // Clear messages before showing settings
+            chatBoxRef.current?.showSettings(true);
+            setMessages([]);
+          }}
+        />
+        <Spacer />
+        <CloseButton p={2} size="md" onClick={onClose} />
+      </Flex>
+      <CardBody padding="2">
+        {sessionId > 0 && inputType && (
+          <ChatBox
+            ref={chatBoxRef}
+            preInput={input}
+            inputType={inputType}
+            systemPrompt={systemPrompt}
+            sessionId={sessionId}
+            newMessages={messages}
+            minW="400px"
+            maxH="300px"
           />
-          {!settings || !settings.apiKey ? (
-            <Center>
-              <Text marginLeft={2}>free trials: {trailRemaining}</Text>
-            </Center>
-          ) : null}
-          <Spacer />
-          <CloseButton p={2} size="md" onClick={onClose} />
-        </Flex>
-      ) : (
-        <Flex p={2}>
-          <div />
-          <IconButton
-            aria-label="Back"
-            variant="outline"
-            icon={<ArrowBackIcon />}
-            onClick={() => {
-              loadSettings();
-              setShowSettings(false);
-            }}
-          />
-          <Spacer />
-          <CloseButton p={2} size="md" onClick={onClose} />
-        </Flex>
-      )}
-      {showSettings ? (
-        <Box width="600px">
-          <Settings />
-        </Box>
-      ) : (
-        <CardBody padding="2">
-          {sessionId > 0 && inputType && (
-            <ChatBox
-              settings={settings}
-              preInput={input}
-              inputType={inputType}
-              systemPrompt={systemPrompt}
-              sessionId={sessionId}
-              newMessages={messages}
-              minW="400px"
-              maxH="300px"
-            />
-          )}
-        </CardBody>
-      )}
+        )}
+      </CardBody>
     </Card>
   );
 }

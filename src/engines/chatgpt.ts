@@ -5,6 +5,7 @@ import { API_BASE_URL } from '@src/constants';
 import { EventStreamContentType, fetchEventSource } from '@fortaine/fetch-event-source';
 import { prettyObject } from '@root/utils/format';
 import { getDeviceId } from '@src/utils';
+import { FREE_TRAIL_LIMIT_REACHED } from '@src/errors';
 
 interface Model {
   id: string;
@@ -136,15 +137,21 @@ export class ChatGPT implements Engine {
         if (!res.ok || !res.headers.get('content-type')?.startsWith(EventStreamContentType) || res.status !== 200) {
           const responseTexts = [];
           let extraInfo = await res.clone().text();
+          let resJson;
           try {
-            const resJson = await res.clone().json();
+            resJson = await res.clone().json();
             extraInfo = prettyObject(resJson);
           } catch {
             /* empty */
           }
 
           if (res.status === 401) {
-            responseTexts.push('Unauthorized');
+            let message = 'Unauthorized';
+            if (resJson && resJson.error === true && resJson.msg === FREE_TRAIL_LIMIT_REACHED) {
+              message = FREE_TRAIL_LIMIT_REACHED;
+            }
+            onError && onError(message);
+            return finish();
           }
 
           if (extraInfo) {
