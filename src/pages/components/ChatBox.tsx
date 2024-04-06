@@ -181,9 +181,9 @@ const ChatBox = React.forwardRef<ChatBoxHandles, Props>(
           console.log('completion finished');
         },
         err => {
+          console.log('completion error:', err);
           setGenerating(false);
           alert(err);
-          throw err;
         },
       );
     };
