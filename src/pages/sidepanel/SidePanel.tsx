@@ -5,10 +5,8 @@ import withErrorBoundary from '@src/shared/hoc/withErrorBoundary';
 import { Box, Button, Center, Divider, Grid, GridItem, Text } from '@chakra-ui/react';
 import { ChatSession, deleteSession, getSessions } from '@pages/storage/chat';
 import ChatBox from '@pages/components/ChatBox';
-import EngineSettings from '@src/engines/engineSettings';
 import { globalConfigKey_CurrentSessionId, getGlobalConfig, saveGlobalConfig } from '@pages/storage/global';
 import { SessionList } from '@pages/sidepanel/SessionList';
-import { GLOBAL_CONFIG_KEY_ENGINE_SETTINGS } from '@src/constants';
 import { createNewSession } from '@pages/content/storageUtils';
 import * as AgentChat from '@src/agent/chat-with-the-bot.json';
 import AgentV2 from '@src/agent/agentV2';
@@ -16,7 +14,6 @@ import AgentV2 from '@src/agent/agentV2';
 const SidePanel = () => {
   const [sessions, setSessions] = useState<Map<number, ChatSession>>(new Map<number, ChatSession>());
   const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
-  const [settings, setSettings] = useState<EngineSettings | null>(null);
 
   const createNewChat = () => {
     createNewSession('', AgentChat as unknown as AgentV2).then(id => {
@@ -26,12 +23,6 @@ const SidePanel = () => {
       });
     });
   };
-
-  useEffect(() => {
-    getGlobalConfig(GLOBAL_CONFIG_KEY_ENGINE_SETTINGS).then((settings: EngineSettings) => {
-      setSettings(settings);
-    });
-  }, []);
 
   useEffect(() => {
     getSessions(100).then(sessions => {
@@ -96,7 +87,7 @@ const SidePanel = () => {
         />
       </GridItem>
       <GridItem pl="2" area={'main'}>
-        {currentSessionId && <ChatBox inputType="selection" settings={settings} sessionId={currentSessionId} />}
+        {currentSessionId && <ChatBox inputType="selection" sessionId={currentSessionId} />}
       </GridItem>
     </Grid>
   );
