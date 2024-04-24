@@ -29,7 +29,7 @@ export default function App(props: Props) {
     }
     console.log('use agent', agent, 'info', info);
 
-    let prompt: string;
+    let prompt: string = '';
     if (info.selectionText) {
       prompt = getPrompt(agent, 'selection').replace('${selection}', info.selectionText);
       const textSystemPrompt = getSystemPrompt(agent, 'selection');
@@ -41,7 +41,8 @@ export default function App(props: Props) {
       setInputType('image');
       setSystemPrompt(imageSystemPrompt);
     } else {
-      return;
+      setInputType('default');
+      setSystemPrompt(getSystemPrompt(agent, 'default'));
     }
 
     if (prompt.length > 0) {
@@ -54,11 +55,8 @@ export default function App(props: Props) {
         console.log('set input', prompt);
         setInput(prompt);
       }
-
-      createNewSession(prompt, agent).then(id => setSessionId(id));
-    } else {
-      alert('Prompt is empty');
     }
+    createNewSession(prompt, agent).then(id => setSessionId(id));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent, info]);

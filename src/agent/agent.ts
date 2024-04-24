@@ -28,6 +28,9 @@ export function getPrompt(agent: Agent, inputType: string): string {
 }
 
 export function getSystemPrompt(agent: Agent, inputType: string): string | undefined {
+  if (inputType === 'default') {
+    return 'You are a AI assistant.';
+  }
   switch (agent.schemaVersion) {
     case 1:
       return (agent as AgentV1).systemPrompt;
@@ -51,6 +54,9 @@ export function getContextTypes(agent: Agent): string[] {
 
 export function getEngineType(agent: Agent, inputType: string): EngineType {
   console.log('getEngineType', agent, inputType);
+  if (inputType === 'default') {
+    return EngineType.ChatGPT;
+  }
   switch (agent.schemaVersion) {
     case 1:
       return (agent as AgentV1).engine;
@@ -62,6 +68,9 @@ export function getEngineType(agent: Agent, inputType: string): EngineType {
 }
 
 export function getEngineModel(agent: Agent, inputType: string): string {
+  if (inputType === 'default') {
+    return 'gpt-3.5-turbo';
+  }
   switch (agent.schemaVersion) {
     case 1:
       return (agent as AgentV1).models[0];
