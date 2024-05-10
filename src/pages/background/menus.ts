@@ -48,6 +48,7 @@ export async function createAgentMenus() {
 
   browser.contextMenus?.onClicked.addListener(async function (info: OnClickData) {
     const agent = agentsRegistry.getAgent(<string>info.menuItemId);
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
 
     console.log('[background.js', 'contextMenus onClicked', info);
     if (info.menuItemId === MENU_ITEM_ID_OPEN_SIDE_PANEL) {
@@ -55,7 +56,6 @@ export async function createAgentMenus() {
       // Only chrome supports this feature.
       await chrome.sidePanel.open({ windowId: tab.windowId });
     } else {
-      const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true })
       tab.id &&
         (await browser.tabs.sendMessage(tab.id, {
           type: MESSAGE_TYPE_MENU_CLICKED,
