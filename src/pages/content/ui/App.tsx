@@ -1,74 +1,131 @@
 import ChatBox, { ChatBoxHandles } from '@pages/components/ChatBox';
 import { Button, Card, CardBody, CloseButton, Flex, IconButton, Spacer, useColorModeValue } from '@chakra-ui/react';
 import React, { useEffect, useRef, useState } from 'react';
-import { Menus } from 'webextension-polyfill-ts';
-import Agent, { getPrompt, getSystemPrompt } from '@src/agent/agent';
+import { browser } from 'webextension-polyfill-ts';
+import { getPrompt, getSystemPrompt } from '@src/agent/agent';
 import { SettingsIcon } from '@chakra-ui/icons';
 import { createNewSession } from '@pages/content/storageUtils';
-import OnClickData = Menus.OnClickData;
+import { BrowserMessage, UserEventType } from '@src/types';
+import { MESSAGE_TYPE_MENU_CLICKED } from '@src/constants';
+import { getClientX, getClientY } from '@src/utils';
 
-interface Props {
-  agent?: Agent;
-  info?: OnClickData;
-  onClose?: (() => void) | null;
-}
+let lastMouseEvent: UserEventType | undefined;
 
-export default function App(props: Props) {
-  const { agent, info, onClose } = props;
+const mouseUpHandler = async (event: UserEventType) => {
+  console.log('[content.js]. mouse up event:', event);
+  lastMouseEvent = event;
+};
+
+const mouseDownHandler = async (event: UserEventType) => {
+  console.log('[content.js]. mouse down event:', event);
+  lastMouseEvent = event;
+};
+
+document.addEventListener('mouseup', mouseUpHandler);
+document.addEventListener('touchend', mouseUpHandler);
+document.addEventListener('mousedown', mouseDownHandler);
+
+export default function App() {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [messages, setMessages] = useState([]);
+  const [title, setTitle] = useState('');
+
   const [input, setInput] = useState(null);
   const [inputType, setInputType] = useState(null);
   const [systemPrompt, setSystemPrompt] = useState(null);
   const [sessionId, setSessionId] = useState(-1);
 
   const chatBoxRef = useRef<ChatBoxHandles | null>(null);
+  // Function called when a new message is received
+  const messagesFromContextMenu = async (msg: BrowserMessage) => {
+    console.log('[content.js]. Message received', msg);
 
-  useEffect(() => {
-    if (!agent || !info) {
-      return;
-    }
-    console.log('use agent', agent, 'info', info);
+    if (msg.type === MESSAGE_TYPE_MENU_CLICKED) {
+      console.log(`menu ${msg} is clicked`);
+      const root = document.createElement('div');
+      document.body.appendChild(root);
+      const x = lastMouseEvent ? getClientX(lastMouseEvent) : 0;
+      const y = lastMouseEvent ? getClientY(lastMouseEvent) : 0;
+      setPosition({ x, y });
 
-    let prompt: string = '';
-    if (info.selectionText) {
-      prompt = getPrompt(agent, 'selection').replace('${selection}', info.selectionText);
-      const textSystemPrompt = getSystemPrompt(agent, 'selection');
-      setInputType('selection');
-      setSystemPrompt(textSystemPrompt);
-    } else if (info.mediaType == 'image') {
-      prompt = getPrompt(agent, 'image');
-      const imageSystemPrompt = getSystemPrompt(agent, 'image');
-      setInputType('image');
-      setSystemPrompt(imageSystemPrompt);
-    } else {
-      setInputType('default');
-      setSystemPrompt(getSystemPrompt(agent, 'default'));
-    }
+      const info = msg.info;
+      const agent = msg.agent;
+      setTitle(agent.name);
 
-    if (prompt.length > 0) {
-      if (agent.autoSend) {
-        setMessages(() => {
-          const userMessage = { role: 'user', content: prompt };
-          return [userMessage];
-        });
+      let prompt: string = '';
+      if (info.selectionText) {
+        prompt = getPrompt(agent, 'selection').replace('${selection}', info.selectionText);
+        const textSystemPrompt = getSystemPrompt(agent, 'selection');
+        setInputType('selection');
+        setSystemPrompt(textSystemPrompt);
+      } else if (info.mediaType == 'image') {
+        prompt = getPrompt(agent, 'image');
+        const imageSystemPrompt = getSystemPrompt(agent, 'image');
+        setInputType('image');
+        setSystemPrompt(imageSystemPrompt);
       } else {
-        console.log('set input', prompt);
-        setInput(prompt);
+        setInputType('default');
+        setSystemPrompt(getSystemPrompt(agent, 'default'));
       }
-    }
-    createNewSession(prompt, agent).then(id => setSessionId(id));
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agent, info]);
+      if (prompt.length > 0) {
+        if (agent.autoSend) {
+          setMessages(() => {
+            const userMessage = { role: 'user', content: prompt };
+            return [userMessage];
+          });
+        } else {
+          console.log('set input', prompt);
+          setInput(prompt);
+        }
+      }
+      createNewSession(prompt, agent).then(id => setSessionId(id));
+    }
+  };
+
+  /**
+   * Fired when a message is sent from either an extension process or a content script.
+   */
+  // this listener should only be added once
+  useEffect(() => {
+    // This code will run only once after the first render
+    browser.runtime.onMessage.addListener(messagesFromContextMenu);
+    console.log('[content.js]. App mounted');
+
+    // Cleanup function
+    return () => {
+      browser.runtime.onMessage.removeListener(messagesFromContextMenu);
+    };
+  }, []); // Empty array means this effect will run only once
+  const onClose = () => {
+    // clear all states
+    setSessionId(-1);
+    setMessages([]);
+    setTitle('');
+    setInput(null);
+    setInputType(null);
+    setSystemPrompt(null);
+    setPosition({ x: 0, y: 0 });
+  };
 
   const bgColor = useColorModeValue('white', 'gray.700');
   const color = useColorModeValue('gray.700', 'white');
 
-  return (
-    <Card bg={bgColor} color={color} lineHeight={5} maxW="100%" maxWidth="600px" zIndex={10000}>
+  return sessionId > 0 ? (
+    <Card
+      bg={bgColor}
+      color={color}
+      lineHeight={5}
+      maxW="100%"
+      maxWidth="600px"
+      zIndex={10000}
+      position="fixed"
+      top={position.y}
+      left={position.x}
+      boxShadow="md">
       <Flex p={2}>
         <Button size="sm" p={2}>
-          {agent.name}
+          {title}
         </Button>
         <IconButton
           aria-label="Open settings"
@@ -99,7 +156,7 @@ export default function App(props: Props) {
         )}
       </CardBody>
     </Card>
-  );
+  ) : null;
 }
 
 App.defaultProps = {
