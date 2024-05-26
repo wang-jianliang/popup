@@ -6,7 +6,7 @@
   "engine": "ChatGPT",
   "models": ["gpt-3.5-turbo"],
   "tags": ["common"],
-  "systemPrompt": "Please provide a clear and concise explanation for the details that the user is seeking. This could be a word with a certain connotation, a unique phrase, a complete sentence, or a specific term.",
+  "systemPrompt": "Please provide a clear and concise explanation for the details that the user is seeking in ${language}. This could be a word with a certain connotation, a unique phrase, a complete sentence, or a specific term.",
   "prompts": {
     "selection": "What is '${selection}'.",
     "image": "What is in this image?"

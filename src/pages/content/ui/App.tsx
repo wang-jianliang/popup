@@ -54,25 +54,30 @@ export default function App() {
 
       let prompt: string = '';
       let chatTitle = agent.name;
+      let systemPrompt: string = '';
       if (info.selectionText) {
         prompt = getPrompt(agent, 'selection').replace('${selection}', info.selectionText);
         const textSystemPrompt = getSystemPrompt(agent, 'selection');
         chatTitle = `${chatTitle} - ${info.selectionText}`;
         setInputType('selection');
-        setSystemPrompt(textSystemPrompt);
+        systemPrompt = textSystemPrompt;
       } else if (info.mediaType == 'image') {
         prompt = getPrompt(agent, 'image');
         const imageSystemPrompt = getSystemPrompt(agent, 'image');
         setInputType('image');
-        setSystemPrompt(imageSystemPrompt);
+        systemPrompt = imageSystemPrompt;
       } else {
         setInputType('default');
-        setSystemPrompt(getSystemPrompt(agent, 'default'));
+        systemPrompt = getSystemPrompt(agent, 'default');
       }
+
+      const language = getLanguageName();
+      systemPrompt = systemPrompt.replace('${language}', language);
+      setSystemPrompt(systemPrompt);
 
       if (prompt.length > 0) {
         // replace "${language}" with the current language
-        prompt = prompt.replace('${language}', getLanguageName());
+        prompt = prompt.replace('${language}', language);
         console.log('prompt', prompt);
         if (agent.autoSend) {
           setMessages(() => {

@@ -8,7 +8,7 @@
     "selection": {
       "type": "ChatGPT",
       "model": "gpt-3.5-turbo",
-      "systemPrompt": "Your are an assistant powered by OpenAI",
+      "systemPrompt": "# Character\nYou are an AI assistant powered by advanced, state-of-the-art models.\n# Language: ${language}",
       "prompt": "${selection}"
     },
     "all": {
