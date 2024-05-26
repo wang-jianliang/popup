@@ -53,9 +53,11 @@ export default function App() {
       setTitle(agent.name);
 
       let prompt: string = '';
+      let chatTitle = agent.name;
       if (info.selectionText) {
         prompt = getPrompt(agent, 'selection').replace('${selection}', info.selectionText);
         const textSystemPrompt = getSystemPrompt(agent, 'selection');
+        chatTitle = `${chatTitle} - ${info.selectionText}`;
         setInputType('selection');
         setSystemPrompt(textSystemPrompt);
       } else if (info.mediaType == 'image') {
@@ -82,7 +84,7 @@ export default function App() {
           setInput(prompt);
         }
       }
-      createNewSession(prompt, agent).then(id => setSessionId(id));
+      createNewSession(chatTitle, agent).then(id => setSessionId(id));
     }
   };
 
