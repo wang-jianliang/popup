@@ -7,7 +7,7 @@ import { SettingsIcon } from '@chakra-ui/icons';
 import { createNewSession } from '@pages/content/storageUtils';
 import { BrowserMessage, UserEventType } from '@src/types';
 import { MESSAGE_TYPE_MENU_CLICKED } from '@src/constants';
-import { getClientX, getClientY } from '@src/utils';
+import { getClientX, getClientY, getLanguageName } from '@src/utils';
 
 let lastMouseEvent: UserEventType | undefined;
 
@@ -69,6 +69,9 @@ export default function App() {
       }
 
       if (prompt.length > 0) {
+        // replace "${language}" with the current language
+        prompt = prompt.replace('${language}', getLanguageName());
+        console.log('prompt', prompt);
         if (agent.autoSend) {
           setMessages(() => {
             const userMessage = { role: 'user', content: prompt };
