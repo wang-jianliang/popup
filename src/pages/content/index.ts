@@ -9,7 +9,7 @@
  */
 
 // disable console
-// console.info = function () {};
+console.info = function () {};
 console.log = console.info;
 
 import('@pages/content/ui');
