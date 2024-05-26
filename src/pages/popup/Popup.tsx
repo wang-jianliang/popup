@@ -16,7 +16,7 @@ const Popup = () => {
       style={{
         backgroundColor: theme === 'light' ? '#fff' : '#000',
       }}>
-      <header className="App-header" style={{ color: theme === 'light' ? '#000' : '#fff' }}>
+      <header className="App-header" style={{ color: theme === 'light' ? '#fff' : '#000' }}>
         <img src={logo} className="App-logo" alt="logo" />
       </header>
       <Settings />
