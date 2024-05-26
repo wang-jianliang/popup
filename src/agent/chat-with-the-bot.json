@@ -7,13 +7,13 @@
   "engines": {
     "selection": {
       "type": "ChatGPT",
-      "model": "gpt-3.5-turbo",
+      "model": "gpt-4o",
       "systemPrompt": "# Character\nYou are an AI assistant powered by advanced, state-of-the-art models.\n# Language: ${language}",
       "prompt": "${selection}"
     },
     "all": {
       "type": "ChatGPT",
-      "model": "gpt-3.5-turbo",
+      "model": "gpt-4o",
       "systemPrompt": "Your are an assistant powered by OpenAI",
       "prompt": ""
     }
